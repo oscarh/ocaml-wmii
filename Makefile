@@ -10,23 +10,20 @@ OCAMLDOC = ocamldoc
 REQUIRES = unix str ixp threads
 
 # Sources
-SOURCES = src/wmiirc
+SOURCES = src/wmiirc.ml
 
 # The output to create
 CLIENT = wmiirc
 
 # Automagic stuff below
 
-CLOBJ = $(patsubst %.ml,%.cmx,$(CLSRC))
+CLOBJ = $(patsubst %.ml,%.cmx,$(SOURCES))
 
 all: $(CLIENT)
 
 $(CLIENT): $(CLOBJ)
-	$(OCAMLFIND) $(OCAMLOPT) -thread -package "$(REQUIRES)" -linkpkg -o $@ $^
-
-%.cmo: %.ml
-	$(OCAMLFIND) $(OCAMLC) -thread -c $(INCLUDES) -package "$(REQUIRES)" \
-		$<
+	$(OCAMLFIND) $(OCAMLOPT) -thread -package "$(REQUIRES)" -linkpkg -o $@ \
+		$^
 
 %.cmi: %.mli
 	$(OCAMLFIND) $(OCAMLC) -thread -c $(INCLUDES) -package "$(REQUIRES)" \

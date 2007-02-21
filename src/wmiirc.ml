@@ -33,7 +33,7 @@ let status_loop () =
 
 (* Main startup *)
 let main () =
-    let status_thread = status_loop status () in
+    let status_thread = status_loop () in
     event_loop ()
 
 let _ = main ()
