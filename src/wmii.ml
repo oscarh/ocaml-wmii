@@ -17,9 +17,26 @@ let write file data =
    ignore(Ixpc.write conn fid iounit Int64.zero len data);
    Ixpc.clunk conn fid
 
-let read file =
+let read file = (* XXX should you clunk? *)
    let fid, iounit = Ixpc.walk_open conn rootfid false file Ixpc.oREAD in
    Ixpc.read conn fid iounit Int64.zero (Int32.of_int 4096)
+
+let create file =
+    let perm = Int32.shift_left (Int32.of_int 0x2) 6 in
+    let splitexp = Str.regexp "\\(.+\\)/\\([a-z]+\\)$" in
+    let dir, file = if Str.string_match splitexp file 0 then
+            (Str.matched_group 1 file, Str.matched_group 2 file)
+        else
+            ("/", file) in
+    print_string ("creating: " ^ file ^ " in: " ^ dir);
+    print_newline ();
+    let fid = Ixpc.walk conn rootfid false dir in
+    let iounit = Ixpc.create conn fid file perm Ixpc.oWRITE in
+    Ixpc.clunk conn fid
+
+let remove file =
+    let fid = Ixpc.walk conn rootfid false file in
+    Ixpc.remove conn fid
 
 let dmenu out_str =
    let dmenu_cmd =

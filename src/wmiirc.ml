@@ -74,10 +74,14 @@ let event_loop () =
 (* Staus loop *)
 let status_loop () =
     let rec loop () =
-        (* Wmii.write status_file (Wmii_conf.status ()); *)
+        Wmii.write status_file (Wmii_conf.status ());
         Thread.delay Wmii_conf.status_interval;
         loop () in
     Thread.create loop ()
+
+let setup_bars () = (* Remove them if we are restarted *)
+    try Wmii.remove "/rbar/status" with Ixpc.IXPError _ -> ();
+    Wmii.create "/rbar/status"
 
 (* Main startup *)
 let main () =
@@ -91,10 +95,14 @@ let main () =
    
    Wmii.write "colrules" "/.*/ -> 50+50";
 
+   (* create a file in tag *)
+
    update_keys ();
    update_events ();
 
-   let status_thread = status_loop () in
+   setup_bars ();
+
+   (* let status_thread = status_loop () in *)
    event_loop ()
 
 let _ = main ()

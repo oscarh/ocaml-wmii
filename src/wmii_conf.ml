@@ -6,6 +6,8 @@ let normcolors = "#222222 #eeeeee #666666"
 let focuscolors = "#ffffff #335577 #447799"
 let backgroundcolors = "#333333"
 
+let default_tag = "default"
+
 (* Key bindings *)
 let modkey = "Mod1"
 let left = "h"
