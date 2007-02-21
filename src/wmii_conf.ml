@@ -52,8 +52,15 @@ let keys =
 
 let events =
    [
-      ("CreateClient", create_client); 
    ]
+
+let tagrules = 
+   "/MPlayer.*/ -> ~\n" ^
+   "/.*/ -> !\n" ^
+   "/.*/ -> default\n"
+
+let colrules = 
+   "/.*/ -> 50+50"
 
 (* Status *)
 let status () =

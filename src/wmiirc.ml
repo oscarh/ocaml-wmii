@@ -92,8 +92,9 @@ let main () =
    Wmii.write "ctl" ("normcolors " ^ Wmii_conf.normcolors);
    Wmii.write "ctl" ("grabmod " ^ Wmii_conf.modkey);
    Wmii.write "ctl" "border 1";
-   
-   Wmii.write "colrules" "/.*/ -> 50+50";
+
+   Wmii.write "tagrules" Wmii_conf.tagrules;
+   Wmii.write "colrules" Wmii_conf.colrules;
 
    (* create a file in tag *)
 
