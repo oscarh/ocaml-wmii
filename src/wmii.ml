@@ -64,19 +64,23 @@ let current_tags () =
 (* Misc helper functions *)
 let hidden_file = Str.regexp "^\\..+"
 let read_dir dir = 
-   let handle = Unix.opendir dir in
-   let rec read_file acc =
-      try 
-         let new_acc = match Unix.readdir handle with
-         | ".." -> acc
-         | "." -> acc
-         | file -> 
-            if Str.string_match hidden_file file 0 then acc else file :: acc in
-         read_file new_acc
-      with End_of_file -> acc in
-   let files = read_file [] in
-   Unix.closedir handle;
-   files
+   try 
+      let handle = Unix.opendir dir in
+      let rec read_file acc =
+         try 
+            let new_acc = match Unix.readdir handle with
+            | ".." -> acc
+            | "." -> acc
+            | file -> if Str.string_match hidden_file file 0 then
+                  acc 
+               else
+                  file :: acc in
+            read_file new_acc
+         with End_of_file -> acc in
+      let files = read_file [] in
+      Unix.closedir handle;
+      files
+   with Unix.Unix_error (_, "opendir", _) -> []
 
 let path_delimiter = Str.regexp ":"
 let programs () =
