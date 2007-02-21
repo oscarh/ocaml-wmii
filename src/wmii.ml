@@ -19,7 +19,9 @@ let write conn rootfid file data =
 
 let read conn rootfid file = (* XXX should you clunk? *)
    let fid, iounit = Ixpc.walk_open conn rootfid false file Ixpc.oREAD in
-   Ixpc.read conn fid iounit Int64.zero (Int32.of_int 4096)
+   let data = Ixpc.read conn fid iounit Int64.zero (Int32.of_int 4096) in
+   Ixpc.clunk conn fid;
+   data
 
 let create conn rootfid file =
     let perm = Int32.shift_left (Int32.of_int 0x2) 6 in
@@ -31,7 +33,7 @@ let create conn rootfid file =
     print_string ("creating: " ^ file ^ " in: " ^ dir);
     print_newline ();
     let fid = Ixpc.walk conn rootfid false dir in
-    let iounit = Ixpc.create conn fid file perm Ixpc.oWRITE in
+    let _ = Ixpc.create conn fid file perm Ixpc.oWRITE in
     Ixpc.clunk conn fid
 
 let remove conn rootfid file =
