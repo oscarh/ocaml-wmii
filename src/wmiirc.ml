@@ -34,7 +34,7 @@ let update_keys () =
    ) 
    key_hash
    "" in
-      Wmii.write "keys" new_keys
+      Wmii.write Wmii.conn Wmii.rootfid "keys" new_keys
  
 (* Event *)
 let handle_key key =
@@ -73,28 +73,30 @@ let event_loop () =
 
 (* Staus loop *)
 let status_loop () =
+   let conn = Ixpc.connect Wmii.wmii_address in
+   let rootfid = Ixpc.attach conn Wmii.user "/" in
     let rec loop () =
-        Wmii.write status_file (Wmii_conf.status ());
+        Wmii.write conn rootfid status_file (Wmii_conf.status ());
         Thread.delay Wmii_conf.status_interval;
         loop () in
     Thread.create loop ()
 
 let setup_bars () = (* Remove them if we are restarted *)
-    try Wmii.remove "/rbar/status" with Ixpc.IXPError _ -> ();
-    Wmii.create "/rbar/status"
+    try Wmii.remove Wmii.conn Wmii.rootfid "/rbar/status" with Ixpc.IXPError _ -> ();
+    Wmii.create Wmii.conn Wmii.rootfid "/rbar/status"
 
 (* Main startup *)
 let main () =
-   Wmii.write "event" "Start wmiirc";
+   Wmii.write Wmii.conn Wmii.rootfid "event" "Start wmiirc";
 
-   Wmii.write "ctl" ("font " ^ Wmii_conf.font);
-   Wmii.write "ctl" ("focuscolors " ^ Wmii_conf.focuscolors);
-   Wmii.write "ctl" ("normcolors " ^ Wmii_conf.normcolors);
-   Wmii.write "ctl" ("grabmod " ^ Wmii_conf.modkey);
-   Wmii.write "ctl" "border 1";
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("font " ^ Wmii_conf.font);
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("focuscolors " ^ Wmii_conf.focuscolors);
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("normcolors " ^ Wmii_conf.normcolors);
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("grabmod " ^ Wmii_conf.modkey);
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" "border 1";
 
-   Wmii.write "tagrules" Wmii_conf.tagrules;
-   Wmii.write "colrules" Wmii_conf.colrules;
+   Wmii.write Wmii.conn Wmii.rootfid "tagrules" Wmii_conf.tagrules;
+   Wmii.write Wmii.conn Wmii.rootfid "colrules" Wmii_conf.colrules;
 
    (* create a file in tag *)
 
@@ -103,7 +105,7 @@ let main () =
 
    setup_bars ();
 
-   (* let status_thread = status_loop () in *)
+   let status_thread = status_loop () in
    event_loop ()
 
 let _ = main ()

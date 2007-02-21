@@ -11,17 +11,17 @@ let rootfid = Ixpc.attach conn user "/"
 
 (* Core functions *)
 
-let write file data =
+let write conn rootfid file data =
    let fid, iounit = Ixpc.walk_open conn rootfid false file Ixpc.oWRITE in
    let len = Int32.of_int (String.length data) in
    ignore(Ixpc.write conn fid iounit Int64.zero len data);
    Ixpc.clunk conn fid
 
-let read file = (* XXX should you clunk? *)
+let read conn rootfid file = (* XXX should you clunk? *)
    let fid, iounit = Ixpc.walk_open conn rootfid false file Ixpc.oREAD in
    Ixpc.read conn fid iounit Int64.zero (Int32.of_int 4096)
 
-let create file =
+let create conn rootfid file =
     let perm = Int32.shift_left (Int32.of_int 0x2) 6 in
     let splitexp = Str.regexp "\\(.+\\)/\\([a-z]+\\)$" in
     let dir, file = if Str.string_match splitexp file 0 then
@@ -34,7 +34,7 @@ let create file =
     let iounit = Ixpc.create conn fid file perm Ixpc.oWRITE in
     Ixpc.clunk conn fid
 
-let remove file =
+let remove conn rootfid file =
     let fid = Ixpc.walk conn rootfid false file in
     Ixpc.remove conn fid
 
@@ -49,7 +49,7 @@ let dmenu out_str =
    String.sub buffer 0 len
 
 let current_tags () =
-   let data = read "/tag" in
+   let data = read conn rootfid "/tag" in
    let files = Ixpc.unpack_files data in
    List.fold_left 
    (
@@ -65,24 +65,24 @@ let spawn cmd =
    ()
 
 let focus dir =
-   write "/tag/sel/ctl" ("select " ^ dir)
+   write conn rootfid "/tag/sel/ctl" ("select " ^ dir)
 
 let send dir =
-   write "/tag/sel/ctl" ("send sel " ^ dir)
+   write conn rootfid "/tag/sel/ctl" ("send sel " ^ dir)
 
 let mode m =
-   write "/tag/sel/ctl" ("colmode sel " ^ m)
+   write conn rootfid "/tag/sel/ctl" ("colmode sel " ^ m)
 
 let sel_tag _ =
    let tags = current_tags () in
    let new_tag = dmenu tags in 
-   write "/ctl" ("view " ^ new_tag)
+   write conn rootfid "/ctl" ("view " ^ new_tag)
 
 let set_tag _ =
-   let cid = read "/client/sel/ctl" in
+   let cid = read conn rootfid "/client/sel/ctl" in
    let tags = current_tags () in
    let new_tag = dmenu tags in 
-   write ("/client/" ^ cid ^ "/tags") new_tag
+   write conn rootfid ("/client/" ^ cid ^ "/tags") new_tag
 
 let launch _ =
    let cmd = dmenu "firefox\ngajim" in
@@ -90,5 +90,5 @@ let launch _ =
    ()
 
 let create_client cid =
-   let current_tag = read "/tag/sel/ctl" in
-   write ("/client/" ^ cid ^ "/tags") current_tag
+   let current_tag = read conn rootfid "/tag/sel/ctl" in
+   write conn rootfid ("/client/" ^ cid ^ "/tags") current_tag
