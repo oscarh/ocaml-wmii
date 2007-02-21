@@ -61,6 +61,36 @@ let current_tags () =
          | name -> name ^ "\n" ^ str
    ) "" files
 
+(* Misc helper functions *)
+let hidden_file = Str.regexp "^\\..+"
+let read_dir dir = 
+   let handle = Unix.opendir dir in
+   let rec read_file acc =
+      try 
+         let new_acc = match Unix.readdir handle with
+         | ".." -> acc
+         | "." -> acc
+         | file -> 
+            if Str.string_match hidden_file file 0 then acc else file :: acc in
+         read_file new_acc
+      with End_of_file -> acc in
+   read_file []
+
+let path_delimiter = Str.regexp ":"
+let programs () =
+    let path = Str.split path_delimiter (Sys.getenv "PATH") in
+    let read acc dir =
+       read_dir dir @ acc in
+    List.fold_left read [] path
+
+let program_str =
+   let buff = Buffer.create 2048 in
+   let progs = programs () in
+   Buffer.add_string buff (List.hd progs);
+   let add program = Buffer.add_string buff ("\n" ^ program) in
+   List.iter add (List.tl progs);
+   Buffer.contents buff
+
 (* Key bind functions *)
 let spawn cmd =
    ignore(Sys.command (cmd ^ "&"));
@@ -87,9 +117,10 @@ let set_tag _ =
    write conn rootfid ("/client/" ^ cid ^ "/tags") new_tag
 
 let launch _ =
-   let cmd = dmenu "firefox\ngajim" in
-   spawn cmd;
-   ()
+   let cmd = dmenu program_str in
+   match cmd with
+   | "" -> ()
+   | cmd -> spawn cmd
 
 let create_client cid =
    let current_tag = read conn rootfid "/tag/sel/ctl" in
