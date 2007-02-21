@@ -61,7 +61,7 @@ let current_tags () =
 
 (* Key bind functions *)
 let spawn cmd =
-   Sys.command (cmd ^ "&");
+   ignore(Sys.command (cmd ^ "&"));
    ()
 
 let focus dir =
