@@ -74,7 +74,9 @@ let read_dir dir =
             if Str.string_match hidden_file file 0 then acc else file :: acc in
          read_file new_acc
       with End_of_file -> acc in
-   read_file []
+   let files = read_file [] in
+   Unix.closedir handle;
+   files
 
 let path_delimiter = Str.regexp ":"
 let programs () =
@@ -85,7 +87,7 @@ let programs () =
 
 let program_str =
    let buff = Buffer.create 2048 in
-   let progs = programs () in
+   let progs = List.sort String.compare (programs ()) in
    Buffer.add_string buff (List.hd progs);
    let add program = Buffer.add_string buff ("\n" ^ program) in
    List.iter add (List.tl progs);
