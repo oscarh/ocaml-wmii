@@ -52,6 +52,9 @@ let keys =
 
 let events =
    [
+      ("CreateTag", create_tag);
+      ("DestroyTag", destroy_tag);
+      ("LeftBarClick", tagbar_click);
    ]
 
 let tagrules = 

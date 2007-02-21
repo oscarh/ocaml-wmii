@@ -11,17 +11,6 @@ let update_events () =
       Hashtbl.add event_hash event func in
    List.iter reg Wmii_conf.events
 
-let handle_event event_type event_arg =
-   try
-      let event_fun = Hashtbl.find event_hash event_type in
-         Printf.printf "Event found in hash\n";
-         flush stdout;
-         event_fun (event_arg)
-   with Not_found ->  
-      Printf.printf "Event not found in hash\n"; 
-      flush stdout;
-      ()  
-
 let update_keys () =
    let reg (key, cb, arg) = 
       Hashtbl.add key_hash key (cb, arg) in
@@ -35,41 +24,62 @@ let update_keys () =
    key_hash
    "" in
       Wmii.write Wmii.conn Wmii.rootfid "keys" new_keys
- 
+
 (* Event *)
+
+let handle_event event_type event_arg =
+   try
+      let event_fun = Hashtbl.find event_hash event_type in
+         Printf.printf "Event found in hash\n";
+         flush stdout;
+         event_fun (event_arg)
+   with Not_found ->  
+      Printf.printf "Event not found in hash\n"; 
+      flush stdout;
+      ()  
+
 let handle_key key =
    try 
    let func, arg = Hashtbl.find key_hash key in
    func arg
    with Not_found -> ()
 
+let handle_raw_event event =
+   let len = String.length event in 
+   let index = String.index event ' ' in 
+   let event_type = String.sub event 0 index in
+   let event_arg = String.sub event (index+1) (len-index-1) in 
+
+   Printf.printf "Event_type: \"%s\"\n" event_type;
+   Printf.printf "Event_arg: \"%s\"\n" event_arg;
+
+   match event_type with
+   | "Key" -> handle_key event_arg;
+   | _ -> handle_event event_type event_arg
+
 let event_loop () =
-   Printf.printf "Read event start: \n";
+   Printf.printf "Event loop start\n";
    flush stdout;
    let fid, iounit = Ixpc.walk_open Wmii.conn Wmii.rootfid false "event" Ixpc.oREAD in
 
    let rec read offset =
-      let event = Ixpc.read Wmii.conn fid iounit offset (Int32.of_int 4096) in
+      let data = Ixpc.read Wmii.conn fid iounit offset (Int32.of_int 4096) in
+      Printf.printf "Got event data: %s\n" data;
+      let read_len = String.length data in 
+      let rec parse_event str =
+         let len = String.length str in
+         if len > 0 then 
+            let index = String.index str '\n' in 
+            let raw_event = String.sub str 0 index in
+            handle_raw_event raw_event;
+            let rest = String.sub str (index+1) (len-index-1) in
+            parse_event rest in
+            parse_event data;
 
-      Printf.printf "Read event: %s\n" event;
-
-      let len = String.length event in 
-      let index = String.index event ' ' in 
-      let event_type = String.sub event 0 index in
-      let event_arg = String.sub event (index+1) (len-index-2) in 
-
-      Printf.printf "Event_type: \"%s\"\n" event_type;
-      Printf.printf "Event_arg: \"%s\"\n" event_arg;
-
-      (match event_type with
-      | "Key" -> handle_key event_arg;
-      | _ -> handle_event event_type event_arg);
-
-      if len > 0 then
-         read (Int64.add offset  (Int64.of_int len)) in
+      if read_len > 0 then
+         read (Int64.add offset  (Int64.of_int read_len)) in
    read Int64.zero;
    Ixpc.clunk Wmii.conn fid
-
 
 (* Staus loop *)
 let status_loop () =

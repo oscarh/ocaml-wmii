@@ -17,7 +17,7 @@ let write conn rootfid file data =
    ignore(Ixpc.write conn fid iounit Int64.zero len data);
    Ixpc.clunk conn fid
 
-let read conn rootfid file = (* XXX should you clunk? *)
+let read conn rootfid file = 
    let fid, iounit = Ixpc.walk_open conn rootfid false file Ixpc.oREAD in
    let data = Ixpc.read conn fid iounit Int64.zero (Int32.of_int 4096) in
    Ixpc.clunk conn fid;
@@ -60,6 +60,8 @@ let current_tags () =
          | "sel" -> ""
          | name -> name ^ "\n" ^ str
    ) "" files
+
+   
 
 (* Misc helper functions *)
 let hidden_file = Str.regexp "^\\..+"
@@ -105,10 +107,13 @@ let send dir =
 let mode m =
    write conn rootfid "/tag/sel/ctl" ("colmode sel " ^ m)
 
+let view_tag tag = 
+   write conn rootfid "/ctl" ("view " ^ tag)
+
 let sel_tag _ =
    let tags = current_tags () in
    let new_tag = dmenu tags in 
-   write conn rootfid "/ctl" ("view " ^ new_tag)
+   view_tag new_tag
 
 let set_tag _ =
    let cid = read conn rootfid "/client/sel/ctl" in
@@ -125,3 +130,17 @@ let launch _ =
 let create_client cid =
    let current_tag = read conn rootfid "/tag/sel/ctl" in
    write conn rootfid ("/client/" ^ cid ^ "/tags") current_tag
+
+let create_tag tag =
+   let tag_file = "/lbar/" ^ tag in
+   create conn rootfid tag_file;
+   write conn rootfid tag_file tag
+
+let destroy_tag tag =
+   remove conn rootfid ("/lbar/" ^ tag)
+
+let tagbar_click arg =
+   let len = String.length arg in
+   let index = String.rindex arg ' ' in 
+   let tag = String.sub arg (index+1) (len-index-1) in
+   view_tag tag
