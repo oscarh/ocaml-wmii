@@ -14,6 +14,7 @@ let left = "h"
 let right = "l"
 let up = "k"
 let down = "j"
+let toggle = "space" (* toggle between floating and managed layer *)
 
 (* Column modes *)
 let default = "d"
@@ -37,10 +38,12 @@ let keys =
       (modkey ^ "-" ^ left, focus, "left");
       (modkey ^ "-" ^ up, focus, "up");
       (modkey ^ "-" ^ down, focus, "down");
+      (modkey ^ "-" ^ toggle, focus, "toggle");
       (modkey ^ "-Shift-" ^ right, send, "right");
       (modkey ^ "-Shift-" ^ left, send, "left");
       (modkey ^ "-Shift-" ^ up, send, "up");
       (modkey ^ "-Shift-" ^ down, send, "down");
+      (modkey ^ "-Shift-" ^ toggle, send, "toggle");
       (modkey ^ "-" ^ default, mode, "default");
       (modkey ^ "-" ^ stack, mode, "stack");
       (modkey ^ "-" ^ max, mode, "max");

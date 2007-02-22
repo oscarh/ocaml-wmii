@@ -2,6 +2,7 @@
 # OCaml programs for compiling
 OCAMLDEP = ocamldep
 OCAMLC = ocamlc
+OCAMLDEBUG = ocamlc -g
 OCAMLOPT = ocamlopt
 OCAMLFIND = ocamlfind
 OCAMLDOC = ocamldoc
@@ -22,6 +23,8 @@ INCLUDES = -I src
 CLOBJ = $(patsubst %.ml,%.cmx,$(SOURCES))
 
 all: $(CLIENT)
+
+debug: $(BYTECODE)
 
 $(CLIENT): $(CLOBJ)
 	$(OCAMLFIND) $(OCAMLOPT) -thread -package "$(REQUIRES)" -linkpkg -o $@ \
