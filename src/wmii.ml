@@ -152,7 +152,9 @@ let create_tag tag =
    write conn rootfid tag_file (normcolors ^ tag)
 
 let destroy_tag tag =
+   try 
    remove conn rootfid ("/lbar/" ^ tag)
+   with Ixpc.IXPError _ -> ()
 
 let tagbar_click arg =
    let len = String.length arg in
