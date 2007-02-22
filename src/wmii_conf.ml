@@ -51,6 +51,7 @@ let keys =
       (modkey ^ "-Shift-" ^ tag, set_tag, "");
       (modkey ^ "-" ^ program, launch, "");
       (modkey ^ "-" ^ termkey, spawn, terminal);
+      (modkey ^ "-Shift-" ^ "c", kill, "");
    ]
 
 let events =

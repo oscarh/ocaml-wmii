@@ -100,6 +100,9 @@ let program_str =
    Buffer.contents buff
 
 (* Key bind functions *)
+let kill _ =
+   write conn rootfid "/client/sel/ctl" "kill"
+
 let spawn cmd =
    ignore(Sys.command (cmd ^ "&"));
    ()
