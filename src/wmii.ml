@@ -142,6 +142,7 @@ let create_client cid =
    let current_tag = read conn rootfid "/tag/sel/ctl" in
    write conn rootfid ("/client/" ^ cid ^ "/tags") current_tag
 
+(* TODO Remove these and have them in a conf file... in some way *)
 let normcolors = "#222222 #eeeeee #666666"
 let focuscolors = "#ffffff #335577 #447799"
 
