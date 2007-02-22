@@ -9,6 +9,9 @@ let user = Sys.getenv "USER"
 let conn = Ixpc.connect wmii_address
 let rootfid = Ixpc.attach conn user "/"
 
+(* Action menu *)
+let (actions : (string, (string -> unit)) Hashtbl.t) = Hashtbl.create 10
+
 (* Core functions *)
 
 let write conn rootfid file data =
@@ -61,7 +64,8 @@ let current_tags () =
          | name -> name ^ "\n" ^ str
    ) "" files
 
-   
+let quit _ =
+   write conn rootfid "/ctl" "quit"
 
 (* Misc helper functions *)
 let hidden_file = Str.regexp "^\\..+"
@@ -133,10 +137,20 @@ let set_tag _ =
    write conn rootfid ("/client/" ^ cid ^ "/tags") new_tag
 
 let launch _ =
-   let cmd = dmenu program_str in
-   match cmd with
+   match dmenu program_str with
    | "" -> ()
    | cmd -> spawn cmd
+
+let action_menu arg =
+   let build_str action _ str = str ^ "\n" ^ action in
+   let action_str = Hashtbl.fold build_str actions "" in
+   match dmenu action_str with
+   | ""-> ()
+   | action -> 
+      try 
+         let cb = Hashtbl.find actions action in
+         cb arg
+      with Not_found -> ()
 
 let create_client cid =
    let current_tag = read conn rootfid "/tag/sel/ctl" in

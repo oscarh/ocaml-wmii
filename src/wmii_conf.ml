@@ -10,11 +10,17 @@ let default_tag = "default"
 
 (* Key bindings *)
 let modkey = "Mod1"
+let modshift = "Shift"
+
 let left = "h"
 let right = "l"
 let up = "k"
 let down = "j"
 let toggle = "space" (* toggle between floating and managed layer *)
+let action = "a"
+
+let kill_key = modshift ^ "-" ^ "c"
+let action_key = "a"
 
 (* Column modes *)
 let default = "d"
@@ -39,19 +45,20 @@ let keys =
       (modkey ^ "-" ^ up, focus, "up");
       (modkey ^ "-" ^ down, focus, "down");
       (modkey ^ "-" ^ toggle, focus, "toggle");
-      (modkey ^ "-Shift-" ^ right, send, "right");
-      (modkey ^ "-Shift-" ^ left, send, "left");
-      (modkey ^ "-Shift-" ^ up, send, "up");
-      (modkey ^ "-Shift-" ^ down, send, "down");
-      (modkey ^ "-Shift-" ^ toggle, send, "toggle");
+      (modkey ^ "-" ^ modshift ^ "-" ^ right, send, "right");
+      (modkey ^ "-" ^ modshift ^ "-" ^ left, send, "left");
+      (modkey ^ "-" ^ modshift ^ "-" ^ up, send, "up");
+      (modkey ^ "-" ^ modshift ^ "-" ^ down, send, "down");
+      (modkey ^ "-" ^ modshift ^ "-" ^ toggle, send, "toggle");
       (modkey ^ "-" ^ default, mode, "default");
       (modkey ^ "-" ^ stack, mode, "stack");
       (modkey ^ "-" ^ max, mode, "max");
       (modkey ^ "-" ^ tag, sel_tag, "");
-      (modkey ^ "-Shift-" ^ tag, set_tag, "");
+      (modkey ^ "-" ^ modshift ^ "-" ^ tag, set_tag, "");
       (modkey ^ "-" ^ program, launch, "");
       (modkey ^ "-" ^ termkey, spawn, terminal);
-      (modkey ^ "-Shift-" ^ "c", kill, "");
+      (modkey ^ "-" ^ kill_key, kill, "");
+      (modkey ^ "-" ^ action_key, action_menu, "");
    ]
 
 let events =
@@ -61,6 +68,11 @@ let events =
       ("LeftBarClick", tagbar_click);
       ("FocusTag", focus_tag);
       ("UnfocusTag", unfocus_tag);
+   ]
+
+let actions =
+   [
+      ("quit", quit);
    ]
 
 let tagrules = 

@@ -1,6 +1,6 @@
 (* Global *)
 let event_hash = Hashtbl.create 10
-let key_hash = Hashtbl.create 10
+let key_hash = Hashtbl.create 20
 
 (* WMII settings *)
 let status_file = "/rbar/status"
@@ -13,24 +13,21 @@ let add_event event func =
 
 let update_events () =
    Hashtbl.clear event_hash;
-   let reg (event, func) =  
-      add_event event func in
+   let reg (event, func) = add_event event func in
    List.iter reg Wmii_conf.events
 
 let update_keys () =
    Hashtbl.clear key_hash;
-   let reg (key, cb, arg) = 
-      Hashtbl.add key_hash key (cb, arg) in
+   let reg (key, cb, arg) = Hashtbl.add key_hash key (cb, arg) in
    List.iter reg Wmii_conf.keys;
+   let key_string key _ key_str = key ^ "\n" ^ key_str in
+   let new_keys = Hashtbl.fold key_string key_hash "" in
+   Wmii.write Wmii.conn Wmii.rootfid "keys" new_keys
 
-   let new_keys = Hashtbl.fold 
-   (
-      fun key _ key_str -> 
-            key ^ "\n" ^ key_str
-   ) 
-   key_hash
-   "" in
-      Wmii.write Wmii.conn Wmii.rootfid "keys" new_keys
+let update_actions () =
+   Hashtbl.clear Wmii.actions;
+   let add_actions (name, cb) = Hashtbl.add Wmii.actions name cb in
+   List.iter add_actions Wmii_conf.actions
 
 (* Event *)
 
@@ -72,28 +69,6 @@ let handle_raw_event event =
 let setup_bars () = (* Remove them if we are restarted *)
     try Wmii.remove Wmii.conn Wmii.rootfid "/rbar/status" with Ixpc.IXPError _ -> ();
     Wmii.create Wmii.conn Wmii.rootfid "/rbar/status"
-
-let init () =
-   Wmii.write Wmii.conn Wmii.rootfid "event" "Start wmiirc";
-
-   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("font " ^ Wmii_conf.font);
-   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("focuscolors " ^ Wmii_conf.focuscolors);
-   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("normcolors " ^ Wmii_conf.normcolors);
-   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("grabmod " ^ Wmii_conf.modkey);
-   Wmii.write Wmii.conn Wmii.rootfid "ctl" "border 1";
-
-   Wmii.write Wmii.conn Wmii.rootfid "tagrules" Wmii_conf.tagrules;
-   Wmii.write Wmii.conn Wmii.rootfid "colrules" Wmii_conf.colrules;
-
-   print_string "set up fonts and colours";
-   print_newline ();
-
-   (* create a file in tag *)
-
-   update_keys ();
-   update_events ();
-
-   setup_bars ()
 
 let restart status_thread _ =
    running := false;
@@ -139,7 +114,28 @@ let status_loop () =
 
 (* Main startup *)
 let main () =
-   init ();
+   Wmii.write Wmii.conn Wmii.rootfid "event" "Start wmiirc";
+
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("font " ^ Wmii_conf.font);
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("focuscolors " ^ Wmii_conf.focuscolors);
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("normcolors " ^ Wmii_conf.normcolors);
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("grabmod " ^ Wmii_conf.modkey);
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" "border 1";
+
+   Wmii.write Wmii.conn Wmii.rootfid "tagrules" Wmii_conf.tagrules;
+   Wmii.write Wmii.conn Wmii.rootfid "colrules" Wmii_conf.colrules;
+
+   print_string "set up fonts and colours";
+   print_newline ();
+
+   (* create a file in tag *)
+
+   update_keys ();
+   update_events ();
+   update_actions ();
+
+   setup_bars ();
+
    let status_thread = status_loop () in
    add_event "Start" (restart status_thread);
    event_loop ()
