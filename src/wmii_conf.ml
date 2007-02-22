@@ -83,14 +83,11 @@ let tagrules =
 let colrules = 
    "/.*/ -> 50+50"
 
-let gajim_msgs () =
-    let cmd = "gajim-remote get_unread_msgs_number 2> /dev/null" in
-    let chan = Unix.open_process_in cmd in
-    try
-        let count = input_line chan in
-        ignore (Unix.close_process_in chan);
-        count
-    with _ -> "-"
+let safe_read func =
+    try 
+        func ()
+    with _ ->
+        "-"
 
 (* Status *)
 let status () =
@@ -101,10 +98,10 @@ let status () =
     let hour = Printf.sprintf "%02d" (tm.Unix.tm_hour + 1) in
     let minute = Printf.sprintf "%02d" tm.Unix.tm_min in
     let timestr = year ^ "-" ^ month ^ "-" ^ day ^ " " ^ hour  ^ ":" ^ minute in
-
-    let msgs = "Msgs: " ^ (gajim_msgs ()) in
-    let battery_percent = Acpi.battery_percent () in
-    let power_state = Acpi.power_state () in
+    
+    let msgs = "Msgs: " ^ safe_read Gajim.msg_count in
+    let battery_percent = safe_read Acpi.battery_percent in
+    let power_state = safe_read Acpi.power_state in
 
     msgs ^ " | " ^
     timestr ^ " | " ^

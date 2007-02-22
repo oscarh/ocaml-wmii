@@ -11,7 +11,7 @@ OCAMLDOC = ocamldoc
 REQUIRES = unix str ixp threads
 
 # Sources
-SOURCES = plugin/acpi.ml \
+SOURCES = plugin/acpi.ml plugin/gajim.ml\
 		  src/wmii.ml src/wmii_conf.ml src/wmiirc.ml
 
 # The output to create
