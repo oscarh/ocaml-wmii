@@ -98,11 +98,11 @@ let safe_read func =
  * The status is listed in the rbar, ordered by the filename.
  *)
 let status () =
-    let tm = Unix.gmtime (Unix.time ()) in
+    let tm = Unix.localtime (Unix.time ()) in
     let year = string_of_int (tm.Unix.tm_year + 1900) in
     let month = Printf.sprintf "%02d" (tm.Unix.tm_mon + 1) in
     let day = Printf.sprintf "%02d" tm.Unix.tm_mday in
-    let hour = Printf.sprintf "%02d" (tm.Unix.tm_hour + 1) in
+    let hour = Printf.sprintf "%02d" (tm.Unix.tm_hour) in
     let minute = Printf.sprintf "%02d" tm.Unix.tm_min in
     let timestr = year ^ "-" ^ month ^ "-" ^ day ^ " " ^ hour  ^ ":" ^ minute in
     
