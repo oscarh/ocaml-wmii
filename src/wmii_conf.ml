@@ -89,7 +89,14 @@ let safe_read func =
     with _ ->
         "-"
 
-(* Status *)
+(* 
+ * Status
+ *
+ * This will be called periodically (depending on status_interval) and should
+ * return a list of type (string * string * (unit -> unit) option).
+ * The elements in the tuple are (filename, status, callback).
+ * The status is listed in the rbar, ordered by the filename.
+ *)
 let status () =
     let tm = Unix.gmtime (Unix.time ()) in
     let year = string_of_int (tm.Unix.tm_year + 1900) in
@@ -103,6 +110,10 @@ let status () =
     let battery_percent = safe_read Acpi.battery_percent in
     let power_state = safe_read Acpi.power_state in
 
-    msgs ^ " | " ^
-    timestr ^ " | " ^
-    "Battery: " ^ battery_percent ^ " (" ^ power_state ^ ")"
+    let battery = "Battery: " ^ battery_percent ^ " (" ^ power_state ^ ")" in
+
+    [
+        ("0_gajim", msgs, None);
+        ("1_date", timestr, None);
+        ("2_battery", battery, None);
+    ]

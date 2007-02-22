@@ -67,8 +67,12 @@ let handle_raw_event event =
       handle_event event ""
 
 let setup_bars () = (* Remove them if we are restarted *)
-    try Wmii.remove Wmii.conn Wmii.rootfid "/rbar/status" with Ixpc.IXPError _ -> ();
-    Wmii.create Wmii.conn Wmii.rootfid "/rbar/status"
+    let data = Wmii.read Wmii.conn Wmii.rootfid "/rbar/" in
+    let dirs = Ixpc.unpack_files data in
+    let remove_file stat =
+       let file = "/rbar/" ^ stat.Fcall.name in
+       try Wmii.remove Wmii.conn Wmii.rootfid file with _ -> () in
+    List.iter remove_file dirs 
 
 let restart status_thread _ =
    running := false;
@@ -77,8 +81,8 @@ let restart status_thread _ =
 let event_loop () =
    Printf.printf "Event loop start\n";
    flush stdout;
-   let fid, iounit = Ixpc.walk_open Wmii.conn Wmii.rootfid false "event" Ixpc.oREAD in
-
+   let fid, iounit =
+      Ixpc.walk_open Wmii.conn Wmii.rootfid false "event" Ixpc.oREAD in
    let rec read offset =
       let data = Ixpc.read Wmii.conn fid iounit offset (Int32.of_int 4096) in
       Printf.printf "Got event data: %s\n" data;
@@ -97,17 +101,27 @@ let event_loop () =
    read Int64.zero;
    Ixpc.clunk Wmii.conn fid
 
+let xwrite conn rootfid file data =
+   (try 
+      let fid = Ixpc.walk conn rootfid false file in
+      ignore (Ixpc.stat conn fid);
+      Ixpc.clunk conn fid
+   with Ixpc.IXPError _ -> Wmii.create conn rootfid file);
+   Wmii.write conn rootfid file data
+
 (* Staus loop *)
 let status_loop () =
    let conn = Ixpc.connect Wmii.wmii_address in
    let rootfid = Ixpc.attach conn Wmii.user "/" in
-   (try 
-      let statusfid = Ixpc.walk conn rootfid false "/rbar/status" in
-      ignore (Ixpc.stat conn statusfid);
-      Ixpc.clunk conn statusfid
-   with Ixpc.IXPError message -> Wmii.create conn rootfid "/rbar/status");
+   let status = Wmii_conf.status () in
+   let xwrite_status (file, data, _) =
+      xwrite conn rootfid ("/rbar/" ^ file) data in
+   List.iter xwrite_status status;
    let rec loop () =
-      Wmii.write conn rootfid status_file (Wmii_conf.status ());
+      let status = Wmii_conf.status () in
+      let write_status (file, data, _) =
+         Wmii.write conn rootfid ("/rbar/" ^ file) data in
+      List.iter write_status status;
       Thread.delay Wmii_conf.status_interval;
       if !running then loop () in
    Thread.create loop ()

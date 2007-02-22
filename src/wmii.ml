@@ -28,7 +28,7 @@ let read conn rootfid file =
 
 let create conn rootfid file =
     let perm = Int32.shift_left (Int32.of_int 0x2) 6 in
-    let splitexp = Str.regexp "\\(.+\\)/\\([a-z]+\\)$" in
+    let splitexp = Str.regexp "\\(.+\\)/\\([0-9A-Za-z_-]+\\)$" in
     let dir, file = if Str.string_match splitexp file 0 then
             (Str.matched_group 1 file, Str.matched_group 2 file)
         else
