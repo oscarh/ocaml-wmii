@@ -59,6 +59,8 @@ let events =
       ("CreateTag", create_tag);
       ("DestroyTag", destroy_tag);
       ("LeftBarClick", tagbar_click);
+      ("FocusTag", focus_tag);
+      ("UnfocusTag", unfocus_tag);
    ]
 
 let tagrules = 

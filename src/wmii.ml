@@ -111,7 +111,9 @@ let focus dir =
    write conn rootfid "/tag/sel/ctl" ("select " ^ dir)
 
 let send dir =
-   write conn rootfid "/tag/sel/ctl" ("send sel " ^ dir)
+   try 
+      write conn rootfid "/tag/sel/ctl" ("send sel " ^ dir) 
+   with Ixpc.IXPError _ -> ()
 
 let mode m =
    write conn rootfid "/tag/sel/ctl" ("colmode sel " ^ m)
@@ -140,10 +142,13 @@ let create_client cid =
    let current_tag = read conn rootfid "/tag/sel/ctl" in
    write conn rootfid ("/client/" ^ cid ^ "/tags") current_tag
 
+let normcolors = "#222222 #eeeeee #666666"
+let focuscolors = "#ffffff #335577 #447799"
+
 let create_tag tag =
    let tag_file = "/lbar/" ^ tag in
    create conn rootfid tag_file;
-   write conn rootfid tag_file tag
+   write conn rootfid tag_file (normcolors ^ tag)
 
 let destroy_tag tag =
    remove conn rootfid ("/lbar/" ^ tag)
@@ -153,3 +158,15 @@ let tagbar_click arg =
    let index = String.rindex arg ' ' in 
    let tag = String.sub arg (index+1) (len-index-1) in
    view_tag tag
+
+let focus_tag tag =
+   Printf.printf "Focusing %s\n" tag;
+   flush stdout;
+   let tag_file = "/lbar/" ^ tag in
+   write conn rootfid tag_file (focuscolors ^ tag)
+
+let unfocus_tag tag =
+   Printf.printf "Unfocusing %s\n" tag;
+   flush stdout;
+   let tag_file = "/lbar/" ^ tag in
+   write conn rootfid tag_file (normcolors ^ tag)

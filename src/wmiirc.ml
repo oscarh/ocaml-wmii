@@ -58,6 +58,8 @@ let handle_raw_event event =
    | _ -> handle_event event_type event_arg
 
    with Not_found ->
+      Printf.printf "Event_type: \"%s\"\n" event;
+      Printf.printf "Event_arg: \"\"\n";
       handle_event event ""
 
 let event_loop () =
