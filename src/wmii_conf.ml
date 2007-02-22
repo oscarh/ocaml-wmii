@@ -65,6 +65,25 @@ let tagrules =
 let colrules = 
    "/.*/ -> 50+50"
 
+let gajim_msgs () =
+    let cmd = "gajim-remote get_unread_msgs_number 2> /dev/null" in
+    let chan = Unix.open_process_in cmd in
+    try
+        let count = input_line chan in
+        ignore (Unix.close_process_in chan);
+        count
+    with _ -> "-"
+
 (* Status *)
 let status () =
-    "Welcome to OCaml-wmii!"
+    let tm = Unix.gmtime (Unix.time ()) in
+    let year = string_of_int (tm.Unix.tm_year + 1900) in
+    let month = Printf.sprintf "%02d" (tm.Unix.tm_mon + 1) in
+    let day = Printf.sprintf "%02d" tm.Unix.tm_mday in
+    let hour = Printf.sprintf "%02d" (tm.Unix.tm_hour + 1) in
+    let minute = Printf.sprintf "%02d" tm.Unix.tm_min in
+    let timestr = year ^ "-" ^ month ^ "-" ^ day ^ " " ^ hour  ^ ":" ^ minute in
+
+    let msgs = "Msgs: " ^ (gajim_msgs ()) in
+
+    msgs ^ " | " ^ timestr
