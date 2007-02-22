@@ -30,11 +30,11 @@ let update_keys () =
 let handle_event event_type event_arg =
    try
       let event_fun = Hashtbl.find event_hash event_type in
-         Printf.printf "Event found in hash\n";
+         Printf.printf "Event found in hash: \"%s\"\n" event_type;
          flush stdout;
          event_fun (event_arg)
    with Not_found ->  
-      Printf.printf "Event not found in hash\n"; 
+      Printf.printf "Event not found in hash: \"%s\"\n" event_type;
       flush stdout;
       ()  
 
@@ -46,16 +46,19 @@ let handle_key key =
 
 let handle_raw_event event =
    let len = String.length event in 
-   let index = String.index event ' ' in 
+   try
+   let index = String.index event ' ' in
    let event_type = String.sub event 0 index in
    let event_arg = String.sub event (index+1) (len-index-1) in 
-
    Printf.printf "Event_type: \"%s\"\n" event_type;
    Printf.printf "Event_arg: \"%s\"\n" event_arg;
 
    match event_type with
    | "Key" -> handle_key event_arg;
    | _ -> handle_event event_type event_arg
+
+   with Not_found ->
+      handle_event event ""
 
 let event_loop () =
    Printf.printf "Event loop start\n";
