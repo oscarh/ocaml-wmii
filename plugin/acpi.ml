@@ -43,7 +43,7 @@ let battery_percent () =
                 float_of_string (Str.matched_group 1 battery_info.(2))
             else
                 1. in
-        let percent = floor (remaning /. capacity) in
-        (string_of_int ((int_of_float percent) * 100)) ^ "%"
+        let percent = floor ((remaning /. capacity) *. 100.) in
+        (string_of_int (int_of_float percent)) ^ "%"
     else 
         "N/A"
