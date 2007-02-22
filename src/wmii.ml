@@ -10,7 +10,7 @@ let conn = Ixpc.connect wmii_address
 let rootfid = Ixpc.attach conn user "/"
 
 (* Action menu *)
-let (actions : (string, (string -> unit)) Hashtbl.t) = Hashtbl.create 10
+let (actions : (string, (unit -> unit)) Hashtbl.t) = Hashtbl.create 10
 
 (* Core functions *)
 
@@ -64,7 +64,7 @@ let current_tags () =
          | name -> name ^ "\n" ^ str
    ) "" files
 
-let quit _ =
+let quit () =
    write conn rootfid "/ctl" "quit"
 
 (* Misc helper functions *)
@@ -141,7 +141,7 @@ let launch _ =
    | "" -> ()
    | cmd -> spawn cmd
 
-let action_menu arg =
+let action_menu _ =
    let action_str = if Hashtbl.length actions > 0 then
       let build_str str action = str ^ "\n" ^ action in
       let action_list = 
@@ -154,7 +154,7 @@ let action_menu arg =
    | action -> 
       try 
          let cb = Hashtbl.find actions action in
-         cb arg
+         cb ()
       with Not_found -> ()
 
 let create_client cid =
