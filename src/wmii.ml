@@ -142,8 +142,13 @@ let launch _ =
    | cmd -> spawn cmd
 
 let action_menu arg =
-   let build_str action _ str = str ^ "\n" ^ action in
-   let action_str = Hashtbl.fold build_str actions "" in
+   let action_str = if Hashtbl.length actions > 0 then
+      let build_str str action = str ^ "\n" ^ action in
+      let action_list = 
+         Hashtbl.fold (fun action _ l -> action :: l) actions [] in
+      List.fold_left build_str (List.hd action_list) (List.tl action_list)
+   else
+      "" in
    match dmenu action_str with
    | ""-> ()
    | action -> 
