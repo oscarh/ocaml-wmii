@@ -103,5 +103,9 @@ let status () =
     let timestr = year ^ "-" ^ month ^ "-" ^ day ^ " " ^ hour  ^ ":" ^ minute in
 
     let msgs = "Msgs: " ^ (gajim_msgs ()) in
+    let battery_percent = Acpi.battery_percent () in
+    let power_state = Acpi.power_state () in
 
-    msgs ^ " | " ^ timestr
+    msgs ^ " | " ^
+    timestr ^ " | " ^
+    "Battery: " ^ battery_percent ^ " (" ^ power_state ^ ")"

@@ -11,12 +11,13 @@ OCAMLDOC = ocamldoc
 REQUIRES = unix str ixp threads
 
 # Sources
-SOURCES = src/wmii.ml src/wmii_conf.ml src/wmiirc.ml
+SOURCES = plugin/acpi.ml \
+		  src/wmii.ml src/wmii_conf.ml src/wmiirc.ml
 
 # The output to create
 CLIENT = wmiirc
 
-INCLUDES = -I src
+INCLUDES = -I src -I plugin
 
 # Automagic stuff below
 
