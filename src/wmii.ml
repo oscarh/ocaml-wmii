@@ -165,11 +165,15 @@ let tagbar_click arg =
 let focus_tag tag =
    Printf.printf "Focusing %s\n" tag;
    flush stdout;
+   try 
    let tag_file = "/lbar/" ^ tag in
    write conn rootfid tag_file (focuscolors ^ tag)
+   with Ixpc.IXPError _ -> ()
 
 let unfocus_tag tag =
    Printf.printf "Unfocusing %s\n" tag;
    flush stdout;
+   try 
    let tag_file = "/lbar/" ^ tag in
    write conn rootfid tag_file (normcolors ^ tag)
+   with Ixpc.IXPError _ -> ()
