@@ -90,31 +90,39 @@ let match_event event args =
    | "Key" -> handle_key (List.hd args)
    | _ -> handle_event event args
 
-let rec split_event str i acc =
-   if i < (String.length str) - 2 then (* beware of \n *)
-      (if str.[i] = ' ' then
-         let rest = String.sub str (i + 1) (String.length str - (i + 1)) in
-         split_event rest 0 ((String.sub str 0 i) :: acc)
-      else
-         split_event str (i + 1) acc)
-   else 
-      let strlen = String.length str in
-      List.rev (String.sub str 0 (strlen - 1) :: acc)
+let rec split_event str i tokens = 
+   if str.[i] = '\n' then
+      let rest = String.sub str (i + 1) (String.length str - (i + 1)) in
+      (List.rev (String.sub str 0 i :: tokens), rest)
+   else if str.[i] = ' ' then
+      let rest = String.sub str (i + 1) (String.length str - (i + 1)) in
+      split_event rest 0 ((String.sub str 0 i) :: tokens)
+   else
+      split_event str (i + 1) tokens
+
+let rec split_events str events =
+   if String.length str > 0 then
+      let event, rest = split_event str 0 [] in
+      split_events rest (event :: events)
+   else
+      List.rev events
 
 let event_loop () =
    Printf.printf "Event loop start\n";
    flush stdout;
    let fid, iounit =
       Ixpc.walk_open Wmii.conn Wmii.rootfid false "event" Ixpc.oREAD in
-   let rec read offset =
-      let data = Ixpc.read Wmii.conn fid iounit offset (Int32.of_int 4096) in
+   let rec read () =
+      let len = (Int32.of_int 4096) in
+      let data = Ixpc.read Wmii.conn fid iounit Int64.zero len in
       Printf.printf "Got event data: %s\n" data;
+      let events = split_events data [] in
+      let handle_events tokens =
+         match_event (List.hd tokens) (List.tl tokens) in
+      List.iter handle_events events;
       let read_len = String.length data in 
-      let tokens = split_event data 0 [] in
-      match_event (List.hd tokens) (List.tl tokens);
-      if read_len > 0 && !running then
-         read (Int64.add offset  (Int64.of_int read_len)) in
-   read Int64.zero;
+      if read_len > 0 && !running then read () in
+   read ();
    Ixpc.clunk Wmii.conn fid
 
 let xwrite conn rootfid file data =

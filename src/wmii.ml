@@ -217,7 +217,7 @@ let destroy_tag args =
    let tag = List.hd args in
    try 
       remove conn rootfid ("/lbar/" ^ tag)
-   with Ixpc.IXPError _ -> ()
+   with Ixpc.IXPError _ -> () (* FIXME log error? *)
 
 let tagbar_click args =
    match args with
