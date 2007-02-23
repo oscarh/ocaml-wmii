@@ -99,14 +99,7 @@ let safe_read func =
  * The status is listed in the rbar, ordered by the filename.
  *)
 let plugin_status () =
-    let tm = Unix.localtime (Unix.time ()) in
-    let year = string_of_int (tm.Unix.tm_year + 1900) in
-    let month = Printf.sprintf "%02d" (tm.Unix.tm_mon + 1) in
-    let day = Printf.sprintf "%02d" tm.Unix.tm_mday in
-    let hour = Printf.sprintf "%02d" (tm.Unix.tm_hour) in
-    let minute = Printf.sprintf "%02d" tm.Unix.tm_min in
-    let timestr = year ^ "-" ^ month ^ "-" ^ day ^ " " ^ hour  ^ ":" ^ minute in
-    
+    let date = Date.localtime () in
     let msgs = "Msgs: " ^ safe_read Gajim.msg_count in
     let battery_percent = safe_read Acpi.battery_percent in
     let power_state = safe_read Acpi.power_state in
@@ -115,7 +108,7 @@ let plugin_status () =
 
     [
         ("0_gajim", msgs);
-        ("1_date", timestr);
+        ("1_date", date);
         ("2_battery", battery);
     ]
 
