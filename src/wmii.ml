@@ -28,11 +28,10 @@ let read conn rootfid file =
 
 let create conn rootfid file =
     let perm = Int32.shift_left (Int32.of_int 0x2) 6 in
-    let splitexp = Str.regexp "\\(.+\\)/\\([0-9A-Za-z_-]+\\)$" in
-    let dir, file = if Str.string_match splitexp file 0 then
-            (Str.matched_group 1 file, Str.matched_group 2 file)
-        else
-            ("/", file) in
+    let index = try String.rindex file '/' with Not_found -> 0 in
+    let dir = String.sub file 0 index in
+    let file = 
+        String.sub file (index + 1) ((String.length file) - (index + 1)) in
     print_string ("creating: " ^ file ^ " in: " ^ dir);
     print_newline ();
     let fid = Ixpc.walk conn rootfid false dir in
