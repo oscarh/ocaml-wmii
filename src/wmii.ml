@@ -52,28 +52,53 @@ let dmenu out_str =
    let len = input c_in buffer 0 1014 in
    String.sub buffer 0 len
 
-let current_tags () =
+let current_tags ?(ignore="") () =
    let data = read conn rootfid "/tag" in
    let files = Ixpc.unpack_files data in
    List.fold_left 
    (
       fun name_list stat -> 
-         match stat.Fcall.name with
-         | "sel" -> []
-         | name -> name :: name_list 
+         let name = stat.Fcall.name in
+         if (String.compare name ignore) == 0 then name_list
+         else
+            match stat.Fcall.name with
+            | "sel" -> []
+            | name -> name :: name_list 
    ) [] files
+
+
+let next_token str =
+   let len = String.length str in
+   let i = String.index str '+' in
+   let token = String.sub str 0 i in
+   let rest = String.sub str (i+1) (len-i-1) in
+   token, rest
+
+
+let rec str_to_list str =
+   try
+      let token, rest = next_token str in
+      token :: str_to_list rest
+   with Not_found -> [str]
+     
+let client_tags () =
+   str_to_list (read conn rootfid "/client/sel/tags")
+
+let current_tag () =
+   read conn rootfid "/tag/sel/ctl"
 
 let quit () =
    write conn rootfid "/ctl" "quit"
 
 (* Misc helper functions *)
-let list_to_str str_list =
+let list_to_str ?prefix:(pre = "") str_list =
    List.fold_left
    (
       fun str_list str ->
+         let pre_str = pre ^ str in
          match str_list with
-         | "" -> str
-         | _ -> str_list ^ "\n" ^ str
+         | "" ->  pre_str 
+         | _ -> str_list ^ "\n" ^ pre_str
    ) "" str_list
 
 
@@ -135,15 +160,21 @@ let view_tag tag =
    write conn rootfid "/ctl" ("view " ^ tag)
 
 let sel_tag _ =
-   let tags = current_tags () in
+   let current = current_tag () in
+   let tags = current_tags ~ignore:current () in
    let tags_str = list_to_str tags in
    let new_tag = dmenu tags_str in 
    view_tag new_tag
 
 let set_tag _ =
    let cid = read conn rootfid "/client/sel/ctl" in
-   let tags = current_tags () in
-   let tags_str = list_to_str tags in
+   let current = current_tag () in
+   let client_tags = client_tags () in
+   let tags = current_tags ~ignore:current () in
+   let regular_tags = list_to_str tags in
+   let plus_tags = list_to_str ~prefix:"+" tags in
+   let minus_tags = list_to_str ~prefix:"-" client_tags in
+   let tags_str =  minus_tags ^ "\n" ^ plus_tags ^ "\n" ^ regular_tags in
    let new_tag = dmenu tags_str in 
    write conn rootfid ("/client/" ^ cid ^ "/tags") new_tag
 
@@ -195,7 +226,6 @@ let tagbar_click args =
 
 let focus_tag args =
    let tag = List.hd args in
-   Printf.printf "Focusing %s\n" tag;
    flush stdout;
    try 
    let tag_file = "/lbar/" ^ tag in
@@ -204,7 +234,6 @@ let focus_tag args =
 
 let unfocus_tag args =
    let tag = List.hd args in
-   Printf.printf "Unfocusing %s\n" tag;
    flush stdout;
    try 
    let tag_file = "/lbar/" ^ tag in
