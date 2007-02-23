@@ -1,5 +1,5 @@
 (* Global *)
-let event_hash = Hashtbl.create 10
+let (event_hash : (string,  (string list -> unit)) Hashtbl.t) = Hashtbl.create 10
 let key_hash = Hashtbl.create 30
 let plugin_actions = Hashtbl.create 10
 
@@ -38,41 +38,6 @@ let update_plugin_actions () =
 
 (* Event *)
 
-let handle_event event_type event_arg =
-   try
-      let event_fun = Hashtbl.find event_hash event_type in
-      Printf.printf "Event found in hash: \"%s\"\n" event_type;
-      flush stdout;
-      event_fun (event_arg)
-   with Not_found ->  
-      Printf.printf "Event not found in hash: \"%s\"\n" event_type;
-      flush stdout;
-      ()  
-
-let handle_key key =
-   try 
-      let func, arg = Hashtbl.find key_hash key in
-      func arg
-   with Not_found -> ()
-
-let handle_raw_event event =
-   let len = String.length event in 
-   try
-      let index = String.index event ' ' in
-      let event_type = String.sub event 0 index in
-      let event_arg = String.sub event (index+1) (len-index-1) in 
-      Printf.printf "Event_type: \"%s\"\n" event_type;
-      Printf.printf "Event_arg: \"%s\"\n" event_arg;
-
-      match event_type with
-      | "Key" -> handle_key event_arg;
-      | _ -> handle_event event_type event_arg
-
-   with Not_found ->
-      Printf.printf "Event_type: \"%s\"\n" event;
-      Printf.printf "Event_arg: \"\"\n";
-      handle_event event ""
-
 let setup_bars () = (* Remove them if we are restarted *)
     let data = Wmii.read Wmii.conn Wmii.rootfid "/rbar/" in
     let dirs = Ixpc.unpack_files data in
@@ -85,14 +50,56 @@ let restart status_thread _ =
    running := false;
    Thread.join status_thread
 
-let rigth_bar_click arg =
-   let index = String.index arg ' ' in
-   let button = int_of_string (String.sub arg 0 index) in
-   let name = String.sub arg (index + 1) ((String.length arg) - (index + 1)) in
+let rigth_bar_click args =
+   match args with
+   | [button; name] -> 
+      (try
+         let cb = Hashtbl.find plugin_actions name in
+          cb (int_of_string button)
+      with _ -> ()) (* TODO log error *)
+   | _ -> ()
+
+let handle_event event args =
    try
-      let cb = Hashtbl.find plugin_actions name in
-       cb button
-   with _ -> () (* TODO log error *)
+      let event_fun = Hashtbl.find event_hash event in
+      Printf.printf "Event found in hash: \"%s\"\n" event;
+      flush stdout;
+      event_fun args
+   with Not_found ->  
+      Printf.printf "Event not found in hash: \"%s\"\n" event;
+      flush stdout;
+      ()  
+
+let handle_key key =
+   print_string ("Got key: \"" ^ key ^ "\"");
+   print_newline ();
+   try 
+      let func, arg = Hashtbl.find key_hash key in
+      print_string "Found key in hash\n";
+      func arg
+   with Not_found -> ()
+
+let match_event event args =
+   print_string ("Event: " ^ event ^ "\n");
+   let rec print_list l =
+      match l with
+      | hd :: tl -> print_string (hd ^ "\n"); print_list tl
+      | [] -> () in
+   print_list args;
+   match event with
+   | "Key" -> handle_key (List.hd args)
+   | _ -> handle_event event args
+
+let rec split_event str i acc =
+   if i < (String.length str) - 2 then (* beware of \n *)
+      (if str.[i] = ' ' then
+         let rest = String.sub str (i + 1) (String.length str - (i + 1)) in
+         split_event rest 0 ((String.sub str 0 i) :: acc)
+      else
+         split_event str (i + 1) acc)
+   else 
+      let strlen = String.length str in
+      List.rev (String.sub str 0 (strlen - 1) :: acc)
 
 let event_loop () =
    Printf.printf "Event loop start\n";
@@ -103,15 +110,8 @@ let event_loop () =
       let data = Ixpc.read Wmii.conn fid iounit offset (Int32.of_int 4096) in
       Printf.printf "Got event data: %s\n" data;
       let read_len = String.length data in 
-      let rec parse_event str =
-         let len = String.length str in
-         if len > 0 then 
-            let index = String.index str '\n' in 
-            let raw_event = String.sub str 0 index in
-            handle_raw_event raw_event;
-            let rest = String.sub str (index+1) (len-index-1) in
-            parse_event rest in
-      parse_event data;
+      let tokens = split_event data 0 [] in
+      match_event (List.hd tokens) (List.tl tokens);
       if read_len > 0 && !running then
          read (Int64.add offset  (Int64.of_int read_len)) in
    read Int64.zero;

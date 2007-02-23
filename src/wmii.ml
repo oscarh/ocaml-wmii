@@ -160,23 +160,25 @@ let create_client cid =
 let normcolors = "#222222 #eeeeee #666666"
 let focuscolors = "#ffffff #335577 #447799"
 
-let create_tag tag =
+let create_tag args =
+   let tag = List.hd args in
    let tag_file = "/lbar/" ^ tag in
    create conn rootfid tag_file;
    write conn rootfid tag_file (normcolors ^ tag)
 
-let destroy_tag tag =
+let destroy_tag args =
+   let tag = List.hd args in
    try 
-   remove conn rootfid ("/lbar/" ^ tag)
+      remove conn rootfid ("/lbar/" ^ tag)
    with Ixpc.IXPError _ -> ()
 
-let tagbar_click arg =
-   let len = String.length arg in
-   let index = String.rindex arg ' ' in 
-   let tag = String.sub arg (index+1) (len-index-1) in
-   view_tag tag
+let tagbar_click args =
+   match args with
+   | [_; tag] -> view_tag tag
+   | _ -> ()
 
-let focus_tag tag =
+let focus_tag args =
+   let tag = List.hd args in
    Printf.printf "Focusing %s\n" tag;
    flush stdout;
    try 
@@ -184,7 +186,8 @@ let focus_tag tag =
    write conn rootfid tag_file (focuscolors ^ tag)
    with Ixpc.IXPError _ -> ()
 
-let unfocus_tag tag =
+let unfocus_tag args =
+   let tag = List.hd args in
    Printf.printf "Unfocusing %s\n" tag;
    flush stdout;
    try 
