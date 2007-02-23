@@ -113,7 +113,7 @@ let status () =
     let battery = "Battery: " ^ battery_percent ^ " (" ^ power_state ^ ")" in
 
     [
-        ("0_gajim", msgs, None);
+        ("0_gajim", msgs, Some Gajim.open_pending_event);
         ("1_date", timestr, None);
         ("2_battery", battery, None);
     ]

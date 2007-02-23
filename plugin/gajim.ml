@@ -7,3 +7,7 @@ let msg_count () =
         ignore (Unix.close_process_in chan);
         count
     with _ -> "-"
+
+let open_pending_event () =
+    let cmd = "gajim-remote show_next_pending_event >/dev/null 2>&1 &" in
+    ignore (Sys.command cmd)
