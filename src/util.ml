@@ -10,3 +10,5 @@ let split_string str delimiter =
       else 
          split str (i - 1) tokens in
    split str ((String.length str) - 1) []
+
+let safe_read func = try func () with _ -> "-"

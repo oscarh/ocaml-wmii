@@ -1,26 +1,40 @@
-(* User Settings *)
 open Wmii
 
+(** User Settings **)
+(* Look and feel *)
 let font = "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*"
 let normcolors = "#222222 #eeeeee #666666"
 let focuscolors = "#ffffff #335577 #447799"
 let backgroundcolors = "#333333"
 
 let default_tag = "default"
+let terminal = "xterm"
+let status_interval = 1.0 (* Seconds *)
 
-(* Key bindings *)
-let modkey = "Mod1"
-let modshift = "Shift"
+(* Rules *)
+let tagrules = 
+   "/MPlayer.*/ -> ~\n" ^
+   "/.*/ -> !\n" ^
+   "/.*/ -> default\n"
 
-let left = "h"
-let right = "l"
-let up = "k"
-let down = "j"
-let toggle = "space" (* toggle between floating and managed layer *)
-let action = "a"
+let colrules = 
+   "/.*/ -> 50+50"
 
-let kill_key = modshift ^ "-" ^ "c"
-let action_key = "a"
+(** Key bindings **)
+(* Control keys *)
+let modkey = "Mod1"                 (* activate key bindings *)
+let modshift = "Shift"              (* access second level bindings *)
+
+(* Movement *)
+let left = "h"                      (* move selection / window left *)
+let right = "l"                     (* move selection / window right *)
+let up = "k"                        (* move selection / window up *)
+let down = "j"                      (* move selection / window down *)
+let toggle = "space"                (* toggle between floating and managed *)
+                                    (* layer                               *)
+
+let kill_key = modshift ^ "-" ^ "c" (* kill a client *)
+let action_key = "a"                (* action menu *)
 
 (* Column modes *)
 let default = "d"
@@ -30,14 +44,11 @@ let max = "m"
 (* Tag *)
 let tag = "t"
 
-(* Program *)
-let program = "p"
-let termkey = "x"
+(* Actions *)
+let program = "p"                   (* Show program list *)
+let termkey = "x"                   (* Launch terminal *)
 
-let terminal = "xterm"
-
-let status_interval = 1.0 (* Seconds *)
-
+(* Activate the key bindings *)
 let keys =
    [
       (modkey ^ "-" ^ right, focus, "right");
@@ -61,6 +72,7 @@ let keys =
       (modkey ^ "-" ^ action_key, action_menu, "");
    ]
 
+(* Register for events *)
 let events =
    [
       ("CreateTag", create_tag);
@@ -70,39 +82,26 @@ let events =
       ("UnfocusTag", unfocus_tag);
    ]
 
+(* Action menu *)
 let actions =
    [
       ("quit", quit);
    ]
 
-let tagrules = 
-   "/MPlayer.*/ -> ~\n" ^
-   "/.*/ -> !\n" ^
-   "/.*/ -> default\n"
-
-let colrules = 
-   "/.*/ -> 50+50"
-
-let safe_read func =
-    try 
-        func ()
-    with _ ->
-        "-"
-
 (* 
- * Status
+ * Plug-in status
  *
  * This will be called periodically (depending on status_interval) and should
- * return a list of type (string * string * (int -> unit) option).
- * The elements in the tuple are (filename, status, callback).
+ * return a list of type (string * string).
+ * The elements in the tuple are (filename, status).
  * The int argument to the callback is the number of the mouse button pressed.
- * The status is listed in the rbar, ordered by the filename.
+ * The status is shown in the rbar, ordered by the filename.
  *)
 let plugin_status () =
     let date = Date.localtime () in
-    let msgs = "Msgs: " ^ safe_read Gajim.msg_count in
-    let battery_percent = safe_read Acpi.battery_percent in
-    let power_state = safe_read Acpi.power_state in
+    let msgs = "Msgs: " ^ Util.safe_read Gajim.msg_count in
+    let battery_percent = Util.safe_read Acpi.battery_percent in
+    let power_state = Util.safe_read Acpi.power_state in
 
     let battery = "Battery: " ^ battery_percent ^ " (" ^ power_state ^ ")" in
 
@@ -112,6 +111,15 @@ let plugin_status () =
         ("2_battery", battery);
     ]
 
+(* 
+ * Plug-in callbacks 
+ *
+ * Will be read on start-up. Connects mouse clicks on right bar to callbacks.
+ * The names should be the same as the names in the list returned by 
+ * plugin_status.
+ * The functions must be of type int -> unit. 
+ * The argument is the number representing the mouse button pressed.
+ *)
 let status_callbacks =
     [
         ("0_gajim", Gajim.plugin_cb);
