@@ -13,7 +13,6 @@ let rootfid = Ixpc.attach conn user "/"
 let (actions : (string, (unit -> unit)) Hashtbl.t) = Hashtbl.create 10
 
 (* Core functions *)
-
 let write conn rootfid file data =
    let fid, iounit = Ixpc.walk_open conn rootfid false file Ixpc.oWRITE in
    let len = Int32.of_int (String.length data) in
@@ -66,21 +65,8 @@ let current_tags ?(ignore="") () =
             | name -> name :: name_list 
    ) [] files
 
-let next_token str =
-   let len = String.length str in
-   let i = String.index str '+' in
-   let token = String.sub str 0 i in
-   let rest = String.sub str (i+1) (len-i-1) in
-   token, rest
-
-let rec str_to_list str =
-   try
-      let token, rest = next_token str in
-      token :: str_to_list rest
-   with Not_found -> [str]
-     
 let client_tags () =
-   str_to_list (read conn rootfid "/client/sel/tags")
+   Util.split_string (read conn rootfid "/client/sel/tags") '+'
 
 let current_tag () =
    read conn rootfid "/tag/sel/ctl"
@@ -100,7 +86,6 @@ let list_to_str ?prefix:(pre = "") str_list =
    ) "" str_list
 
 
-let hidden_file = Str.regexp "^\\..+"
 let read_dir dir = 
    try 
       let handle = Unix.opendir dir in
@@ -109,10 +94,7 @@ let read_dir dir =
             let new_acc = match Unix.readdir handle with
             | ".." -> acc
             | "." -> acc
-            | file -> if Str.string_match hidden_file file 0 then
-                  acc 
-               else
-                  file :: acc in
+            | file -> if file.[0] = '.' then acc else file :: acc in
             read_file new_acc
          with End_of_file -> acc in
       let files = read_file [] in
@@ -120,11 +102,9 @@ let read_dir dir =
       files
    with Unix.Unix_error (_, "opendir", _) -> []
 
-let path_delimiter = Str.regexp ":"
 let programs () =
-    let path = Str.split path_delimiter (Sys.getenv "PATH") in
-    let read acc dir =
-       read_dir dir @ acc in
+    let path = Util.split_string (Sys.getenv "PATH") ':' in
+    let read acc dir = read_dir dir @ acc in
     List.fold_left read [] path
 
 let program_str =
