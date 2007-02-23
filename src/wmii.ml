@@ -66,14 +66,12 @@ let current_tags ?(ignore="") () =
             | name -> name :: name_list 
    ) [] files
 
-
 let next_token str =
    let len = String.length str in
    let i = String.index str '+' in
    let token = String.sub str 0 i in
    let rest = String.sub str (i+1) (len-i-1) in
    token, rest
-
 
 let rec str_to_list str =
    try
@@ -167,6 +165,7 @@ let sel_tag _ =
    view_tag new_tag
 
 let set_tag _ =
+   try 
    let cid = read conn rootfid "/client/sel/ctl" in
    let current = current_tag () in
    let client_tags = client_tags () in
@@ -177,6 +176,7 @@ let set_tag _ =
    let tags_str =  minus_tags ^ "\n" ^ plus_tags ^ "\n" ^ regular_tags in
    let new_tag = dmenu tags_str in 
    write conn rootfid ("/client/" ^ cid ^ "/tags") new_tag
+   with _ -> ()
 
 let launch _ =
    match dmenu program_str with
