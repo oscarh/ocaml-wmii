@@ -1,6 +1,7 @@
 (* Global *)
 let event_hash = Hashtbl.create 10
-let key_hash = Hashtbl.create 20
+let key_hash = Hashtbl.create 30
+let plugin_actions = Hashtbl.create 10
 
 (* WMII settings *)
 let status_file = "/rbar/status"
@@ -28,6 +29,12 @@ let update_actions () =
    Hashtbl.clear Wmii.actions;
    let add_actions (name, cb) = Hashtbl.add Wmii.actions name cb in
    List.iter add_actions Wmii_conf.actions
+
+let update_plugin_actions () =
+   Hashtbl.clear plugin_actions;
+   let add_actions (name, callback) = 
+      Hashtbl.add plugin_actions name callback in
+   List.iter add_actions (Wmii_conf.status_callbacks)
 
 (* Event *)
 
@@ -78,6 +85,15 @@ let restart status_thread _ =
    running := false;
    Thread.join status_thread
 
+let rigth_bar_click arg =
+   let index = String.index arg ' ' in
+   let button = int_of_string (String.sub arg 0 index) in
+   let name = String.sub arg (index + 1) ((String.length arg) - (index + 1)) in
+   try
+      let cb = Hashtbl.find plugin_actions name in
+       cb button
+   with _ -> () (* TODO log error *)
+
 let event_loop () =
    Printf.printf "Event loop start\n";
    flush stdout;
@@ -113,13 +129,13 @@ let xwrite conn rootfid file data =
 let status_loop () =
    let conn = Ixpc.connect Wmii.wmii_address in
    let rootfid = Ixpc.attach conn Wmii.user "/" in
-   let status = Wmii_conf.status () in
-   let xwrite_status (file, data, _) =
+   let status = Wmii_conf.plugin_status () in
+   let xwrite_status (file, data) =
       xwrite conn rootfid ("/rbar/" ^ file) data in
    List.iter xwrite_status status;
    let rec loop () =
-      let status = Wmii_conf.status () in
-      let write_status (file, data, _) =
+      let status = Wmii_conf.plugin_status () in
+      let write_status (file, data) =
          Wmii.write conn rootfid ("/rbar/" ^ file) data in
       List.iter write_status status;
       Thread.delay Wmii_conf.status_interval;
@@ -147,6 +163,9 @@ let main () =
    update_keys ();
    update_events ();
    update_actions ();
+   update_plugin_actions ();
+
+   add_event "RightBarClick" rigth_bar_click;
 
    setup_bars ();
 

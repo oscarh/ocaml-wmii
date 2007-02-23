@@ -93,11 +93,12 @@ let safe_read func =
  * Status
  *
  * This will be called periodically (depending on status_interval) and should
- * return a list of type (string * string * (unit -> unit) option).
+ * return a list of type (string * string * (int -> unit) option).
  * The elements in the tuple are (filename, status, callback).
+ * The int argument to the callback is the number of the mouse button pressed.
  * The status is listed in the rbar, ordered by the filename.
  *)
-let status () =
+let plugin_status () =
     let tm = Unix.localtime (Unix.time ()) in
     let year = string_of_int (tm.Unix.tm_year + 1900) in
     let month = Printf.sprintf "%02d" (tm.Unix.tm_mon + 1) in
@@ -113,7 +114,12 @@ let status () =
     let battery = "Battery: " ^ battery_percent ^ " (" ^ power_state ^ ")" in
 
     [
-        ("0_gajim", msgs, Some Gajim.open_pending_event);
-        ("1_date", timestr, None);
-        ("2_battery", battery, None);
+        ("0_gajim", msgs);
+        ("1_date", timestr);
+        ("2_battery", battery);
+    ]
+
+let status_callbacks =
+    [
+        ("0_gajim", Gajim.plugin_cb);
     ]

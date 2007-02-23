@@ -67,19 +67,15 @@ let quit () =
    write conn rootfid "/ctl" "quit"
 
 (* Misc helper functions *)
-let hidden_file = Str.regexp "^\\..+"
-let read_dir dir = 
+let read_dir dir =
    try 
       let handle = Unix.opendir dir in
       let rec read_file acc =
          try 
             let new_acc = match Unix.readdir handle with
-            | ".." -> acc
-            | "." -> acc
-            | file -> if Str.string_match hidden_file file 0 then
-                  acc 
-               else
-                  file :: acc in
+                | ".." -> acc
+                | "." -> acc
+                | file -> if file.[0] = '.' then acc else file :: acc in
             read_file new_acc
          with End_of_file -> acc in
       let files = read_file [] in
