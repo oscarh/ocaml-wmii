@@ -57,25 +57,39 @@ let current_tags () =
    let files = Ixpc.unpack_files data in
    List.fold_left 
    (
-      fun str stat -> 
+      fun name_list stat -> 
          match stat.Fcall.name with
-         | "sel" -> ""
-         | name -> name ^ "\n" ^ str
-   ) "" files
+         | "sel" -> []
+         | name -> name :: name_list 
+   ) [] files
 
 let quit () =
    write conn rootfid "/ctl" "quit"
 
 (* Misc helper functions *)
-let read_dir dir =
+let list_to_str str_list =
+   List.fold_left
+   (
+      fun str_list str ->
+         match str_list with
+         | "" -> str
+         | _ -> str_list ^ "\n" ^ str
+   ) "" str_list
+
+
+let hidden_file = Str.regexp "^\\..+"
+let read_dir dir = 
    try 
       let handle = Unix.opendir dir in
       let rec read_file acc =
          try 
             let new_acc = match Unix.readdir handle with
-                | ".." -> acc
-                | "." -> acc
-                | file -> if file.[0] = '.' then acc else file :: acc in
+            | ".." -> acc
+            | "." -> acc
+            | file -> if Str.string_match hidden_file file 0 then
+                  acc 
+               else
+                  file :: acc in
             read_file new_acc
          with End_of_file -> acc in
       let files = read_file [] in
@@ -122,13 +136,15 @@ let view_tag tag =
 
 let sel_tag _ =
    let tags = current_tags () in
-   let new_tag = dmenu tags in 
+   let tags_str = list_to_str tags in
+   let new_tag = dmenu tags_str in 
    view_tag new_tag
 
 let set_tag _ =
    let cid = read conn rootfid "/client/sel/ctl" in
    let tags = current_tags () in
-   let new_tag = dmenu tags in 
+   let tags_str = list_to_str tags in
+   let new_tag = dmenu tags_str in 
    write conn rootfid ("/client/" ^ cid ^ "/tags") new_tag
 
 let launch _ =
