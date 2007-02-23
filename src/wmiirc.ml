@@ -1,3 +1,5 @@
+open Printf
+
 (* Global *)
 let (event_hash : (string,  (string list -> unit)) Hashtbl.t) = Hashtbl.create 10
 let key_hash = Hashtbl.create 30
@@ -62,28 +64,24 @@ let rigth_bar_click args =
 let handle_event event args =
    try
       let event_fun = Hashtbl.find event_hash event in
-      Printf.printf "Event found in hash: \"%s\"\n" event;
-      flush stdout;
+      Wmii.debug (sprintf "Event found in hash: \"%s\"\n" event);
       event_fun args
    with Not_found ->  
-      Printf.printf "Event not found in hash: \"%s\"\n" event;
-      flush stdout;
-      ()  
+      Wmii.debug (sprintf "Event not found in hash: \"%s\"\n" event)
 
 let handle_key key =
-   print_string ("Got key: \"" ^ key ^ "\"");
-   print_newline ();
+   Wmii.debug ("Got key: \"" ^ key ^ "\"");
    try 
       let func, arg = Hashtbl.find key_hash key in
-      print_string "Found key in hash\n";
+      Wmii.debug "Found key in hash\n";
       func arg
-   with Not_found -> ()
+   with Not_found -> Wmii.debug "Didn't find key in hash\n"
 
 let match_event event args =
-   print_string ("Event: " ^ event ^ "\n");
+   Wmii.debug (sprintf "Event: %s" event);
    let rec print_list l =
       match l with
-      | hd :: tl -> print_string (hd ^ "\n"); print_list tl
+      | hd :: tl -> Wmii.debug (sprintf "Arg: %s\n" hd); print_list tl
       | [] -> () in
    print_list args;
    match event with
@@ -108,14 +106,13 @@ let rec split_events str events =
       List.rev events
 
 let event_loop () =
-   Printf.printf "Event loop start\n";
-   flush stdout;
+   Wmii.debug (sprintf "Event loop start\n");
    let fid, iounit =
       Ixpc.walk_open Wmii.conn Wmii.rootfid false "event" Ixpc.oREAD in
    let rec read () =
       let len = (Int32.of_int 4096) in
       let data = Ixpc.read Wmii.conn fid iounit Int64.zero len in
-      Printf.printf "Got event data: %s\n" data;
+      Wmii.debug (sprintf "Got event data: %s\n" data);
       let events = split_events data [] in
       let handle_events tokens =
          match_event (List.hd tokens) (List.tl tokens) in
@@ -163,15 +160,13 @@ let main () =
    Wmii.write Wmii.conn Wmii.rootfid "tagrules" Wmii_conf.tagrules;
    Wmii.write Wmii.conn Wmii.rootfid "colrules" Wmii_conf.colrules;
 
-   print_string "set up fonts and colours";
-   print_newline ();
-
-   (* create a file in tag *)
-
    update_keys ();
    update_events ();
    update_actions ();
    update_plugin_actions ();
+
+   if Wmii_conf.debug then
+       Wmii.debug_channel := Some (open_out Wmii_conf.debug_file);
 
    add_event "RightBarClick" rigth_bar_click;
 

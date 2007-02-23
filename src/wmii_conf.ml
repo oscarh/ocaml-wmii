@@ -20,6 +20,10 @@ let tagrules =
 let colrules = 
    "/.*/ -> 50+50"
 
+(* Debug settings *)
+let debug_file = "/tmp/wmii_debug.log"
+let debug = true
+
 (** Key bindings **)
 (* Control keys *)
 let modkey = "Mod1"                 (* activate key bindings *)

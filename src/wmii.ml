@@ -9,8 +9,18 @@ let user = Sys.getenv "USER"
 let conn = Ixpc.connect wmii_address
 let rootfid = Ixpc.attach conn user "/"
 
+(* Activate/deactivate debug *)
+let debug_channel = ref None
+
 (* Action menu *)
 let (actions : (string, (unit -> unit)) Hashtbl.t) = Hashtbl.create 10
+
+let debug str =
+   match !debug_channel with
+   | Some channel -> 
+      output_string channel str;
+      flush channel
+   | None -> ()
 
 (* Core functions *)
 let write conn rootfid file data =
@@ -31,8 +41,6 @@ let create conn rootfid file =
     let dir = String.sub file 0 index in
     let file = 
         String.sub file (index + 1) ((String.length file) - (index + 1)) in
-    print_string ("creating: " ^ file ^ " in: " ^ dir);
-    print_newline ();
     let fid = Ixpc.walk conn rootfid false dir in
     let _ = Ixpc.create conn fid file perm Ixpc.oWRITE in
     Ixpc.clunk conn fid
