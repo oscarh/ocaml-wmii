@@ -46,8 +46,9 @@ let error_popup error =
     let exit = "Exit wmiirc" in
     let exit_value = -1 in
     let cmd = 
-       sprintf "xmessage -print \"%s\" -buttons \"%s:%d,%s:%d\" -default \"%s\""
-        error_massage recover recover_value exit exit_value recover in
+       sprintf "xmessage -print \"%s\" -buttons \"%s:%d,%s:%d\" -default \
+       \"%s\" >/dev/null"
+           error_massage recover recover_value exit exit_value recover in
     if Sys.command cmd = recover_value then true else false
 
 (* Event *)

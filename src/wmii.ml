@@ -146,12 +146,16 @@ let spawn cmd =
    ignore(Sys.command (cmd ^ "&"));
    ()
 
-let focus dir =
-   write conn rootfid "/tag/sel/ctl" ("select " ^ dir)
+let focus dir = 
+   (* 
+    * Catching exception due to 
+    * http://flyspray.otur.se/?do=details&task_id=12  
+    *)
+   try write conn rootfid "/tag/sel/ctl" ("select " ^ dir)
+   with Ixpc.IXPError _ -> ()
 
 let send dir =
-   try 
-      write conn rootfid "/tag/sel/ctl" ("send sel " ^ dir) 
+   try write conn rootfid "/tag/sel/ctl" ("send sel " ^ dir) 
    with Ixpc.IXPError _ -> ()
 
 let mode m =
