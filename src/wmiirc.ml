@@ -74,25 +74,25 @@ let rigth_bar_click args =
 let handle_event event args =
    try
       let event_fun = Hashtbl.find event_hash event in
-      Wmii.debug (sprintf "Event found in hash: \"%s\"\n" event);
+      Wmii.debug (sprintf "Event found in hash: \"%s\"\n\n" event);
       event_fun args
    with Not_found ->  
-      Wmii.debug (sprintf "Event not found in hash: \"%s\"\n" event)
+      Wmii.debug (sprintf "Event not found in hash: \"%s\"\n\n" event)
 
 let handle_key key =
-   Wmii.debug ("Got key: \"" ^ key ^ "\"");
    try 
       let func, arg = Hashtbl.find key_hash key in
-      Wmii.debug "Found key in hash\n";
+      Wmii.debug (sprintf "Key found in hash \"%s\"\n\n" key);
       func arg
-   with Not_found -> Wmii.debug "Didn't find key in hash\n"
+   with Not_found -> 
+       Wmii.debug (sprintf "Key not found in hash in hash: \"%s\"\n\n" key)
 
 let match_event event args =
    Wmii.debug (sprintf "Event: %s\n" event);
    let rec print_list l =
       match l with
       | hd :: tl -> Wmii.debug (sprintf "Arg: %s\n" hd); print_list tl
-      | [] -> Wmii.debug "\n" in
+      | [] -> () in
    print_list args;
    match event with
    | "Key" -> handle_key (List.hd args)
