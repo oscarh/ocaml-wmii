@@ -38,8 +38,18 @@ let update_plugin_actions () =
       Hashtbl.add plugin_actions name callback in
    List.iter add_actions (Wmii_conf.status_callbacks)
 
-(* Event *)
+let error_popup error = 
+    let error_massage = "OCaml-wmii has run in to problems.\n\n" ^
+                        " The error was: " ^ error in
+    let recover = "Recover from error" in
+    let recover_value = 0 in
+    let exit = "Exit wmiirc" in
+    let exit_value = -1 in
+    let cmd = sprintf "xmessage -print %s -buttons %s:%d,%s:%d -default %s"
+        error_massage recover recover_value exit exit_value recover in
+    if Sys.command cmd = recover_value then true else false
 
+(* Event *)
 let setup_bars () = (* Remove them if we are restarted *)
     let data = Wmii.read Wmii.conn Wmii.rootfid "/rbar/" in
     let dirs = Ixpc.unpack_files data in
@@ -111,14 +121,16 @@ let event_loop () =
       Ixpc.walk_open Wmii.conn Wmii.rootfid false "event" Ixpc.oREAD in
    let rec read () =
       let len = (Int32.of_int 4096) in
-      let data = Ixpc.read Wmii.conn fid iounit Int64.zero len in
-      Wmii.debug (sprintf "Got event data: %s\n" data);
-      let events = split_events data [] in
-      let handle_events tokens =
-         match_event (List.hd tokens) (List.tl tokens) in
-      List.iter handle_events events;
-      let read_len = String.length data in 
-      if read_len > 0 && !running then read () in
+      try 
+          let data = Ixpc.read Wmii.conn fid iounit Int64.zero len in
+          Wmii.debug (sprintf "Got event data: %s\n" data);
+          let events = split_events data [] in
+          let handle_events tokens =
+             match_event (List.hd tokens) (List.tl tokens) in
+          List.iter handle_events events;
+          let read_len = String.length data in 
+          if read_len > 0 && !running then read ()
+      with excp -> if error_popup (Printexc.to_string excp) then read () in
    read ();
    Ixpc.clunk Wmii.conn fid
 
