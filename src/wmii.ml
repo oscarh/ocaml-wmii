@@ -76,7 +76,9 @@ let client_tags () =
    Util.split_string (read conn rootfid "/client/sel/tags") '+'
 
 let current_tag () =
+   try
    read conn rootfid "/tag/sel/ctl"
+   with Ixpc.IXPError _ -> ""
 
 let quit () =
    write conn rootfid "/ctl" "quit"
