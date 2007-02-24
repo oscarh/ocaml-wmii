@@ -68,7 +68,8 @@ let rigth_bar_click args =
       (try
          let cb = Hashtbl.find plugin_actions name in
           cb (int_of_string button)
-      with _ -> ()) (* TODO log error *)
+      with e -> 
+         Wmii.debug (sprintf "\nERROR: \n%s\n\n" (Printexc.to_string e)))
    | _ -> ()
 
 let handle_event event args =

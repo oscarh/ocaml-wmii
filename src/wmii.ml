@@ -1,3 +1,5 @@
+open Printf
+
 (* Connection *)
 let adrs_exp = Str.regexp "unix!\\(.+\\)"
 let wmii_address =
@@ -217,7 +219,8 @@ let destroy_tag args =
    let tag = List.hd args in
    try 
       remove conn rootfid ("/lbar/" ^ tag)
-   with Ixpc.IXPError _ -> () (* FIXME log error? *)
+   with Ixpc.IXPError msg -> 
+      debug (sprintf "\nERROR:\nIXPError %s\n\n" msg)
 
 let tagbar_click args =
    match args with
