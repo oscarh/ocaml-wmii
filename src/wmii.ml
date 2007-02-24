@@ -169,15 +169,15 @@ let sel_tag _ =
 
 let set_tag _ =
    try 
-   let cid = read conn rootfid "/client/sel/ctl" in
-   let client_tags = client_tags () in
-   let tags = current_tags () in
-   let regular_tags = list_to_str tags in
-   let plus_tags = list_to_str ~ignore:client_tags ~prefix:"+" tags in
-   let minus_tags = list_to_str ~prefix:"-" client_tags in
-   let tags_str =  minus_tags ^ "\n" ^ plus_tags ^ "\n" ^ regular_tags in
-   let new_tag = dmenu tags_str in 
-   write conn rootfid ("/client/" ^ cid ^ "/tags") new_tag
+      let cid = read conn rootfid "/client/sel/ctl" in
+      let client_tags = client_tags () in
+      let tags = current_tags () in
+      let regular_tags = list_to_str tags in
+      let plus_tags = list_to_str ~ignore:client_tags ~prefix:"+" tags in
+      let minus_tags = list_to_str ~prefix:"-" client_tags in
+      let tags_str =  minus_tags ^ "\n" ^ plus_tags ^ "\n" ^ regular_tags in
+      let new_tag = dmenu tags_str in 
+      write conn rootfid ("/client/" ^ cid ^ "/tags") new_tag
    with _ -> ()
 
 let launch _ =
@@ -231,14 +231,14 @@ let focus_tag args =
    let tag = List.hd args in
    flush stdout;
    try 
-   let tag_file = "/lbar/" ^ tag in
-   write conn rootfid tag_file (focuscolors ^ tag)
+      let tag_file = "/lbar/" ^ tag in
+      write conn rootfid tag_file (focuscolors ^ tag)
    with Ixpc.IXPError _ -> ()
 
 let unfocus_tag args =
    let tag = List.hd args in
    flush stdout;
    try 
-   let tag_file = "/lbar/" ^ tag in
-   write conn rootfid tag_file (normcolors ^ tag)
+      let tag_file = "/lbar/" ^ tag in
+      write conn rootfid tag_file (normcolors ^ tag)
    with Ixpc.IXPError _ -> ()
