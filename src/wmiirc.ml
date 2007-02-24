@@ -88,11 +88,11 @@ let handle_key key =
    with Not_found -> Wmii.debug "Didn't find key in hash\n"
 
 let match_event event args =
-   Wmii.debug (sprintf "Event: %s" event);
+   Wmii.debug (sprintf "Event: %s\n" event);
    let rec print_list l =
       match l with
       | hd :: tl -> Wmii.debug (sprintf "Arg: %s\n" hd); print_list tl
-      | [] -> () in
+      | [] -> Wmii.debug "\n" in
    print_list args;
    match event with
    | "Key" -> handle_key (List.hd args)
@@ -123,7 +123,6 @@ let event_loop () =
       let len = (Int32.of_int 4096) in
       try 
           let data = Ixpc.read Wmii.conn fid iounit Int64.zero len in
-          Wmii.debug (sprintf "Got event data: %s\n" data);
           let events = split_events data [] in
           let handle_events tokens =
              match_event (List.hd tokens) (List.tl tokens) in
