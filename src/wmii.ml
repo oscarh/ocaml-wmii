@@ -103,6 +103,9 @@ let rec filter l filter_l =
          let new_l = do_filtering l head [] in
          filter new_l tail
 
+let send_to_tag cid tag =
+   write conn rootfid ("/client/" ^ cid ^ "/tags") tag
+
 (* Misc helper functions *)
 let list_to_str ?ignore:(ignore = []) ?prefix:(pre = "") str_list =
    let filtered_list = filter str_list ignore in
@@ -188,7 +191,7 @@ let set_tag _ =
       let minus_tags = list_to_str ~prefix:"-" client_tags in
       let tags_str =  minus_tags ^ "\n" ^ plus_tags ^ "\n" ^ regular_tags in
       let new_tag = dmenu ~prompt:"Set tag:" tags_str in 
-      write conn rootfid ("/client/" ^ cid ^ "/tags") new_tag
+      send_to_tag cid new_tag;
    with _ -> ()
 
 let launch _ =
