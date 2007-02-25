@@ -90,6 +90,7 @@ let events =
 let actions =
    [
       ("quit", quit);
+      ("wmiirc", fun () -> spawn Sys.executable_name);
    ]
 
 (* 
