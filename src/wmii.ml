@@ -11,8 +11,13 @@ let user = Sys.getenv "USER"
 let conn = Ixpc.connect wmii_address
 let rootfid = Ixpc.attach conn user "/"
 
+type color = {text:string; color:string; border:string}
 (* Activate/deactivate debug *)
 let debug_channel = ref None
+
+let normcolors = ref {text = "#222222" ; color = "#eeeeee" ; border="#666666"}
+let focuscolors = ref {text = "#ffffff" ; color = "#335577" ; border = "#447799"}
+let backgroundcolors = ref "#333333"
 
 (* Action menu *)
 let (actions : (string, (unit -> unit)) Hashtbl.t) = Hashtbl.create 10
@@ -56,8 +61,11 @@ let dmenu ?prompt:(prompt="") out_str =
       "dmenu" ^ 
     (match prompt with
     | "" -> ""
-    |  _ -> " -p \"" ^ prompt ^ "\"") 
-    ^ " -b -nb #eeeeee -nf #222222 -sb #335577 -sf #ffffff" in
+    |  _ -> " -p \"" ^ prompt ^ "\"") ^ 
+    " -b -nb " ^ !normcolors.color ^ 
+    " -nf " ^ !normcolors.text ^ 
+    " -sb " ^ !focuscolors.color ^
+    " -sf " ^ !focuscolors.text  in
    let c_in, c_out = Unix.open_process dmenu_cmd in
    output_string c_out out_str;
    close_out c_out;
@@ -107,6 +115,9 @@ let send_to_tag cid tag =
    write conn rootfid ("/client/" ^ cid ^ "/tags") tag
 
 (* Misc helper functions *)
+let color_to_string color =
+   color.text ^ " " ^ color.color ^ " " ^ color.border
+
 let list_to_str ?ignore:(ignore = []) ?prefix:(pre = "") str_list =
    let filtered_list = filter str_list ignore in
    List.fold_left
@@ -222,15 +233,12 @@ let create_client cid =
    let current_tag = read conn rootfid "/tag/sel/ctl" in
    write conn rootfid ("/client/" ^ cid ^ "/tags") current_tag
 
-(* TODO Remove these and have them in a conf file... in some way *)
-let normcolors = "#222222 #eeeeee #666666"
-let focuscolors = "#ffffff #335577 #447799"
-
 let create_tag args =
    let tag = List.hd args in
    let tag_file = "/lbar/" ^ tag in
    create conn rootfid tag_file;
-   write conn rootfid tag_file (normcolors ^ tag)
+   write conn rootfid tag_file 
+      ((color_to_string !normcolors) ^ tag)
 
 let destroy_tag args =
    let tag = List.hd args in
@@ -249,7 +257,8 @@ let focus_tag args =
    flush stdout;
    try 
       let tag_file = "/lbar/" ^ tag in
-      write conn rootfid tag_file (focuscolors ^ tag)
+      write conn rootfid tag_file 
+         ((color_to_string !focuscolors) ^ tag)
    with Ixpc.IXPError _ -> ()
 
 let unfocus_tag args =
@@ -257,5 +266,6 @@ let unfocus_tag args =
    flush stdout;
    try 
       let tag_file = "/lbar/" ^ tag in
-      write conn rootfid tag_file (normcolors ^ tag)
+      write conn rootfid tag_file 
+         ((color_to_string !normcolors) ^ tag)
    with Ixpc.IXPError _ -> ()

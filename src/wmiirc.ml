@@ -182,8 +182,10 @@ let main () =
    Wmii.write Wmii.conn Wmii.rootfid "event" "Start wmiirc";
 
    Wmii.write Wmii.conn Wmii.rootfid "ctl" ("font " ^ Wmii_conf.font);
-   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("focuscolors " ^ Wmii_conf.focuscolors);
-   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("normcolors " ^ Wmii_conf.normcolors);
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("focuscolors " ^ 
+      (Wmii.color_to_string Wmii_conf.focuscolors));
+   Wmii.write Wmii.conn Wmii.rootfid "ctl" ("normcolors " ^ 
+      (Wmii.color_to_string Wmii_conf.normcolors));
    Wmii.write Wmii.conn Wmii.rootfid "ctl" ("grabmod " ^ Wmii_conf.modkey);
    Wmii.write Wmii.conn Wmii.rootfid "ctl" "border 1";
 
@@ -197,6 +199,10 @@ let main () =
 
    if Wmii_conf.debug then
        Wmii.debug_channel := Some (open_out Wmii_conf.debug_file);
+
+   Wmii.normcolors := Wmii_conf.normcolors;
+   Wmii.focuscolors := Wmii_conf.focuscolors;
+   Wmii.backgroundcolors := Wmii_conf.backgroundcolors;
 
    add_event "RightBarClick" rigth_bar_click;
 

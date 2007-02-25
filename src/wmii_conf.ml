@@ -3,8 +3,8 @@ open Wmii
 (** User Settings **)
 (* Look and feel *)
 let font = "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*"
-let normcolors = "#222222 #eeeeee #666666"
-let focuscolors = "#ffffff #335577 #447799"
+let normcolors = {text = "#222222" ; color = "#eeeeee" ; border="#666666"}
+let focuscolors = {text = "#ffffff" ; color = "#335577" ; border = "#447799"}
 let backgroundcolors = "#333333"
 
 let default_tag = "default"
