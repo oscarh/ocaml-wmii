@@ -111,7 +111,7 @@ let plugin_status () =
 
     [
         ("0_gajim", msgs);
-        ("1_date", date);
+        ("1_date", date); 
         ("2_battery", battery);
     ]
 

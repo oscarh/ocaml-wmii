@@ -38,9 +38,9 @@ let update_plugin_actions () =
       Hashtbl.add plugin_actions name callback in
    List.iter add_actions (Wmii_conf.status_callbacks)
 
-let error_popup error = 
+let error_popup error error_str = 
     let error_massage = "OCaml-wmii has run in to problems.\n\n" ^
-                        " The error was: " ^ error in
+                        " The error was: " ^ error ^ " : " ^ error_str in
     let recover = "Recover from error" in
     let recover_value = 0 in
     let exit = "Exit wmiirc" in
@@ -50,6 +50,22 @@ let error_popup error =
        \"%s\" >/dev/null"
            error_massage recover recover_value exit exit_value recover in
     if Sys.command cmd = recover_value then true else false
+
+let handle_error excp =
+   let str = match excp with
+   | Unix.Unix_error (error, _, _) -> Unix.error_message error
+   | Ixpc.IXPError str -> str
+   | _ -> "" 
+    in if
+      error_popup (Printexc.to_string excp) str
+   then
+      (
+         ignore(Sys.command (Sys.executable_name ^ "&")); 
+         ()
+      )
+   else
+      exit 1
+
 
 (* Event *)
 let setup_bars () = (* Remove them if we are restarted *)
@@ -132,7 +148,7 @@ let event_loop () =
           List.iter handle_events events;
           let read_len = String.length data in 
           if read_len > 0 && !running then read ()
-      with excp -> if error_popup (Printexc.to_string excp) then read () in
+      with excp -> handle_error excp in
    read ();
    Ixpc.clunk Wmii.conn fid
 
