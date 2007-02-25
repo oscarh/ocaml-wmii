@@ -188,8 +188,11 @@ let set_tag _ =
       let tags = current_tags () in
       let regular_tags = list_to_str tags in
       let plus_tags = list_to_str ~ignore:client_tags ~prefix:"+" tags in
-      let minus_tags = list_to_str ~prefix:"-" client_tags in
-      let tags_str =  minus_tags ^ "\n" ^ plus_tags ^ "\n" ^ regular_tags in
+      let minus_tags = 
+         if List.length client_tags > 1 then
+            list_to_str ~prefix:"-" client_tags
+         else "" in
+      let tags_str =  list_to_str [minus_tags ; plus_tags ; regular_tags] in
       let new_tag = dmenu ~prompt:"Set tag:" tags_str in 
       send_to_tag cid new_tag;
    with _ -> ()
