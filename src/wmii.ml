@@ -51,9 +51,13 @@ let remove conn rootfid file =
     let fid = Ixpc.walk conn rootfid false file in
     Ixpc.remove conn fid
 
-let dmenu out_str =
+let dmenu ?prompt:(prompt="") out_str =
    let dmenu_cmd =
-      "dmenu -b -nb #eeeeee -nf #222222 -sb #335577 -sf #ffffff" in
+      "dmenu" ^ 
+    (match prompt with
+    | "" -> ""
+    |  _ -> " -p \"" ^ prompt ^ "\"") 
+    ^ " -b -nb #eeeeee -nf #222222 -sb #335577 -sf #ffffff" in
    let c_in, c_out = Unix.open_process dmenu_cmd in
    output_string c_out out_str;
    close_out c_out;
@@ -170,7 +174,7 @@ let sel_tag _ =
    let current = [current_tag ()] in
    let tags = current_tags () in
    let tags_str = list_to_str ~ignore:current tags in
-   let new_tag = dmenu tags_str in 
+   let new_tag = dmenu ~prompt:"View tag:" tags_str in 
    view_tag new_tag
 
 let set_tag _ =
@@ -182,7 +186,7 @@ let set_tag _ =
       let plus_tags = list_to_str ~ignore:client_tags ~prefix:"+" tags in
       let minus_tags = list_to_str ~prefix:"-" client_tags in
       let tags_str =  minus_tags ^ "\n" ^ plus_tags ^ "\n" ^ regular_tags in
-      let new_tag = dmenu tags_str in 
+      let new_tag = dmenu ~prompt:"Set tag:" tags_str in 
       write conn rootfid ("/client/" ^ cid ^ "/tags") new_tag
    with _ -> ()
 
