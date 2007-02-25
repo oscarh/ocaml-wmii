@@ -103,15 +103,15 @@ let actions =
  *)
 let plugin_status () =
     let date = Date.localtime () in
-    let msgs = "Msgs: " ^ Util.safe_read Gajim.msg_count in
+    (* let msgs = "Msgs: " ^ Util.safe_read Gajim.msg_count in*)
     let battery_percent = Util.safe_read Acpi.battery_percent in
     let power_state = Util.safe_read Acpi.power_state in
 
     let battery = "Battery: " ^ battery_percent ^ " (" ^ power_state ^ ")" in
 
     [
-        ("0_gajim", msgs);
-        ("1_date", date);
+        (*("0_gajim", msgs);*)
+        ("1_date", date); 
         ("2_battery", battery);
     ]
 

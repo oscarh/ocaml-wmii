@@ -52,12 +52,12 @@ let error_popup error error_str =
     if Sys.command cmd = recover_value then true else false
 
 let handle_error excp =
-   if
-   match excp with
-   | Unix.Unix_error (error, _, _) -> 
-         error_popup (Printexc.to_string excp) (Unix.error_message error)
-   | _ -> 
-         error_popup (Printexc.to_string excp) ""
+   let str = match excp with
+   | Unix.Unix_error (error, _, _) -> Unix.error_message error
+   | Ixpc.IXPError str -> str
+   | _ -> "" 
+    in if
+      error_popup (Printexc.to_string excp) str
    then
       (
          ignore(Sys.command (Sys.executable_name ^ "&")); 
