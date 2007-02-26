@@ -203,6 +203,7 @@ let main () =
    Wmii.normcolors := Wmii_conf.normcolors;
    Wmii.focuscolors := Wmii_conf.focuscolors;
    Wmii.backgroundcolors := Wmii_conf.backgroundcolors;
+   Wmii.font := Wmii_conf.font;
 
    add_event "RightBarClick" rigth_bar_click;
 

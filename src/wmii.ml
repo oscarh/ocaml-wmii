@@ -18,6 +18,7 @@ let debug_channel = ref None
 let normcolors = ref {text = "#222222" ; color = "#eeeeee" ; border="#666666"}
 let focuscolors = ref {text = "#ffffff" ; color = "#335577" ; border = "#447799"}
 let backgroundcolors = ref "#333333"
+let font = ref "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*"
 
 (* Action menu *)
 let (actions : (string, (unit -> unit)) Hashtbl.t) = Hashtbl.create 10
@@ -57,15 +58,16 @@ let remove conn rootfid file =
     Ixpc.remove conn fid
 
 let dmenu ?prompt:(prompt="") out_str =
-   let dmenu_cmd =
-      "dmenu" ^ 
-    (match prompt with
-    | "" -> ""
-    |  _ -> " -p \"" ^ prompt ^ "\"") ^ 
-    " -b -nb " ^ !normcolors.color ^ 
-    " -nf " ^ !normcolors.text ^ 
-    " -sb " ^ !focuscolors.color ^
-    " -sf " ^ !focuscolors.text  in
+   let dmenu_cmd = sprintf 
+      "dmenu %s -b -fn \"%s\" -nb \"%s\" -nf \"%s\" -sb \"%s\" -sf \"%s\""
+      (match prompt with
+      | "" -> ""
+      |  _ -> " -p \"" ^ prompt ^ "\"")
+      !font
+      !normcolors.color
+      !normcolors.text
+      !focuscolors.color
+      !focuscolors.text in
    let c_in, c_out = Unix.open_process dmenu_cmd in
    output_string c_out out_str;
    close_out c_out;
