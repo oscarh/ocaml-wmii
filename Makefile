@@ -12,8 +12,10 @@ REQUIRES = unix str ixp threads
 
 # Sources
 SOURCES = src/util.ml src/wmii.ml \
-			plugin/tmp_tag.mli plugin/tmp_tag.ml plugin/acpi.ml plugin/gajim.ml \
-			plugin/date.ml \
+			plugin/tmp_tag.mli plugin/tmp_tag.ml \
+			plugin/acpi.mli plugin/acpi.ml \
+			plugin/gajim.mli plugin/gajim.ml \
+			plugin/date.mli plugin/date.ml \
 			src/wmii_conf.ml src/wmiirc.ml
 
 INCLUDES = -I src -I plugin
