@@ -82,7 +82,9 @@ let dmenu ?prompt:(prompt="") out_str =
       (* We should not care about these in the child. *)
       Unix.close in_write; Unix.close out_read;
       (* All set, start dmenu *)
-      Unix.execvp cmd args)
+      try Unix.execvp cmd args with _ ->
+         let msg = "Could not execute dmenu, make sure it is in your path." in
+         raise (Failure msg))
    | pid ->
       (* Close the child's fd:s. *)
       (Unix.close out_write; Unix.close in_read;
