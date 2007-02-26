@@ -74,6 +74,11 @@ let dmenu ?prompt:(prompt="") out_str =
    let buffer = String.create 1024 in
    let len = input c_in buffer 0 1014 in
    close_in c_in;
+   (*
+    * We're cheating with closing the channels, 
+    * so we need to wait for dmenu to exit ourselves.
+    *)
+   ignore (Unix.wait ()); 
    String.sub buffer 0 len
 
 let current_tags () =
