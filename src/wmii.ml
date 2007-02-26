@@ -65,8 +65,10 @@ let dmenu ?prompt:(prompt="") out_str =
     " -b -nb " ^ !normcolors.color ^ 
     " -nf " ^ !normcolors.text ^ 
     " -sb " ^ !focuscolors.color ^
-    " -sf " ^ !focuscolors.text  in
-   let c_in, c_out = Unix.open_process dmenu_cmd in
+    " -sf " ^ !focuscolors.text ^ " "  in
+   let c_in, c_out = Unix.open_process (dmenu_cmd ^ "&") in
+   Printf.printf "%s\n" dmenu_cmd;
+   flush stdout;
    output_string c_out out_str;
    close_out c_out;
    let buffer = String.create 1024 in
@@ -189,7 +191,7 @@ let sel_tag _ =
    let current = [current_tag ()] in
    let tags = current_tags () in
    let tags_str = list_to_str ~ignore:current tags in
-   let new_tag = dmenu ~prompt:"View tag:" tags_str in 
+   let new_tag = dmenu ~prompt:"view:" tags_str in 
    view_tag new_tag
 
 let set_tag _ =
@@ -204,7 +206,7 @@ let set_tag _ =
             list_to_str ~prefix:"-" client_tags
          else "" in
       let tags_str =  list_to_str [minus_tags ; plus_tags ; regular_tags] in
-      let new_tag = dmenu ~prompt:"Set tag:" tags_str in 
+      let new_tag = dmenu ~prompt:"set:" tags_str in 
       send_to_tag cid new_tag;
    with _ -> ()
 
