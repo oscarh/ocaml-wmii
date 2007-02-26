@@ -58,28 +58,43 @@ let remove conn rootfid file =
     Ixpc.remove conn fid
 
 let dmenu ?prompt:(prompt="") out_str =
-   let dmenu_cmd = sprintf 
-      "dmenu %s -b -fn \"%s\" -nb \"%s\" -nf \"%s\" -sb \"%s\" -sf \"%s\""
-      (match prompt with
-      | "" -> ""
-      |  _ -> " -p \"" ^ prompt ^ "\"")
-      !font
-      !normcolors.color
-      !normcolors.text
-      !focuscolors.color
-      !focuscolors.text in
-   let c_in, c_out = Unix.open_process dmenu_cmd in
-   output_string c_out out_str;
-   close_out c_out;
-   let buffer = String.create 1024 in
-   let len = input c_in buffer 0 1014 in
-   close_in c_in;
-   (*
-    * We're cheating with closing the channels, 
-    * so we need to wait for dmenu to exit ourselves.
-    *)
-   ignore (Unix.wait ()); 
-   String.sub buffer 0 len
+   let cmd = "dmenu" in
+   let args = [|
+      cmd;
+      "-b";
+      "-fn"; !font;
+      "-nb"; !normcolors.color;
+      "-nf"; !normcolors.text;
+      "-sb"; !focuscolors.color;
+      "-sf"; !focuscolors.text;
+   |] in
+   let args = match prompt with
+      | "" -> args
+      |  _ -> Array.append args [|"-p"; prompt|] in
+   (* Names with regard to child process. *)
+   let in_read, in_write = Unix.pipe () in
+   let out_read, out_write = Unix.pipe () in
+   match Unix.fork () with
+   | 0 ->
+      (* Use the pipes as stdin / stdout. *)
+      (Unix.dup2 in_read Unix.stdin; Unix.close in_read;
+      Unix.dup2 out_write Unix.stdout; Unix.close out_write;
+      (* We should not care about these in the child. *)
+      Unix.close in_write; Unix.close out_read;
+      (* All set, start dmenu *)
+      Unix.execvp cmd args)
+   | pid ->
+      (* Close the child's fd:s. *)
+      (Unix.close out_write; Unix.close in_read;
+      ignore (Unix.write in_write out_str 0 (String.length out_str));
+      (* EOF in dmenu *)
+      Unix.close in_write;
+      let buffer = String.create 1024 in
+      let len = Unix.read out_read buffer 0 1024 in
+      Unix.close out_read;
+      (* Clean up child process. *)
+      ignore (Unix.waitpid [] pid);
+      String.sub buffer 0 len)
 
 let current_tags () =
    let data = read conn rootfid "/tag" in
