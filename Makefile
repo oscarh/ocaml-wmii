@@ -33,7 +33,10 @@ OBJX = $(patsubst %.ml,%.cmx,$(SOURCES))
 
 .SUFFIXES: .cmo .cmi .cmx .ml .mli
 
-all: $(OBJX)
+.PHONY: all
+all: $(CLIENT)
+	
+$(CLIENT): $(OBJX)
 	$(OCAMLFIND) $(OCAMLOPT) $(OCAMLOPTFLAGS) $(OCAMLFINDFLAGS) -linkpkg -o $@ \
 		$^
 
