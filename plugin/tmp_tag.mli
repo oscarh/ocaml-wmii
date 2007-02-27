@@ -33,4 +33,19 @@
 (* SUCH DAMAGE.                                                               *)
 (******************************************************************************)
 
+(**
+ * Creates an temporary adds it to a client, and selects that tag.
+ * Moves back to the original tag if executed again.
+ * Add this with a key combination in Wmii_conf to activate.
+ *)
 val toggle : 'a -> unit
+
+(**
+ * This is a safety callback.
+ * If you plan on destroying clients rather than executing toggle again some
+ * cleanup must be done (since this remembers where the client came from).
+ * Add this element:
+ * [("DestroyClient", Tmp_tag.destroy_client_callback);]
+ * to events in Wmii_conf if you think you might need it.
+ *)
+val destroy_client_callback : string list -> unit

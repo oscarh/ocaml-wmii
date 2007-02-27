@@ -35,27 +35,34 @@
 
 open Wmii
 
-let from = ref None
+let original_tags = Hashtbl.create 4
 
-let tag () =
+let destroy_client_callback args =
+   let cid = List.hd args in
+   Hashtbl.remove original_tags cid
+
+let tag cid =
    try
-      let cid = read conn rootfid "/client/sel/ctl" in
-      from := Some (current_tag ());
+      Hashtbl.add original_tags cid (current_tag ());
       let tmp_tag = "+" ^ cid in
       send_to_tag cid tmp_tag;
       view_tag  tmp_tag
    with _ -> ()
 
-let untag_and_view tag =
+let untag_and_view cid tag =
    try
-      let cid = read conn rootfid "/client/sel/ctl" in
-      from := None;
+      Hashtbl.remove original_tags cid;
       let tmp_tag = "-" ^ cid in
       send_to_tag cid tmp_tag;
       view_tag tag
    with _ -> ()
 
 let toggle _ =
-   match !from with
-   | None -> tag ()
-   | Some tag -> untag_and_view tag
+   try
+      let cid = read conn rootfid "/client/sel/ctl" in
+      (try 
+         let tag = Hashtbl.find original_tags cid in
+         untag_and_view cid tag
+      with Not_found ->
+         tag cid)
+  with _ -> ()
