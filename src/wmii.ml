@@ -239,7 +239,8 @@ let send dir =
    with Ixpc.IXPError _ -> ()
 
 let mode m =
-   write conn rootfid "/tag/sel/ctl" ("colmode sel " ^ m)
+   try write conn rootfid "/tag/sel/ctl" ("colmode sel " ^ m)
+   with Ixpc.IXPError _ -> ()
 
 let view_tag tag = 
    write conn rootfid "/ctl" ("view " ^ tag)
