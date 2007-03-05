@@ -2,7 +2,7 @@ ocaml-wmii
 
 Copyright 2007
 Ulf Eliasson, eliassou at ituniv dot se
-Oscar Hellström, oscar at oscarh dot net
+Oscar HellstrÃ¶m, oscar at oscarh dot net
 
 1. What is OCaml-Wmii
 2. Prerequisites
@@ -26,7 +26,7 @@ You will need OCaml-IXP (http://personal.oscarh.net/ocaml-ixp.php) to build
 ocaml-wmii.
 
 3. How to configure
-Open the wmii_conf.ml and edit to your preference.
+Open the src/wmii_conf.ml and edit to your preference.
 Check the plugin directory if there is something you might want to use.
 
 4. How to install
