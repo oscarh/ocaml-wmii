@@ -269,7 +269,7 @@ let set_tag _ =
    with _ -> ()
 
 let launch _ =
-   match dmenu program_str with
+   match dmenu ~prompt:"run: " program_str with
    | "" -> ()
    | cmd -> spawn cmd
 
@@ -281,7 +281,7 @@ let action_menu _ =
       List.fold_left build_str (List.hd action_list) (List.tl action_list)
    else
       "" in
-   match dmenu action_str with
+   match dmenu ~prompt:"action: " action_str with
    | ""-> ()
    | action -> 
       try 
