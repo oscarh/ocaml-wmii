@@ -1,5 +1,5 @@
 (******************************************************************************)
-(* OCaml-IXP                                                                  *)
+(* ocaml-wmii                                                                 *)
 (*                                                                            *)
 (* Copyright 2007                                                             *)
 (* Oscar Hellström, oscar at oscarh dot net                                   *)
