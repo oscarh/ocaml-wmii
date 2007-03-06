@@ -35,6 +35,11 @@
 
 open Printf
 
+(* Types/Globals *)
+type color = {text:string; color:string; border:string}
+
+let last_tag = ref None
+
 (* Connection *)
 let adrs_exp = Str.regexp "unix!\\(.+\\)"
 let wmii_address =
@@ -46,7 +51,6 @@ let user = Sys.getenv "USER"
 let conn = Ixpc.connect wmii_address
 let rootfid = Ixpc.attach conn user "/"
 
-type color = {text:string; color:string; border:string}
 (* Activate/deactivate debug *)
 let debug_channel = ref None
 
@@ -289,6 +293,12 @@ let action_menu _ =
          cb ()
       with Not_found -> ()
 
+let toggle_last _ =
+   match !last_tag with
+   | Some t -> view_tag t
+   | None -> ()
+
+(* Event functions *)
 let create_client cid =
    let current_tag = read conn rootfid "/tag/sel/ctl" in
    write conn rootfid ("/client/" ^ cid ^ "/tags") current_tag
@@ -323,6 +333,7 @@ let focus_tag args =
 
 let unfocus_tag args =
    let tag = List.hd args in
+   last_tag := Some tag;
    flush stdout;
    try 
       let tag_file = "/lbar/" ^ tag in

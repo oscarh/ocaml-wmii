@@ -81,6 +81,7 @@ let max = "m"
 
 (* Tag *)
 let tag = "t"
+let last = "i"
 
 (* Actions *)
 let program = "p"                   (* Show program list *)
@@ -108,6 +109,7 @@ let keys =
       (modkey ^ "-" ^ termkey, spawn, terminal);
       (modkey ^ "-" ^ kill_key, kill, "");
       (modkey ^ "-" ^ action_key, action_menu, "");
+      (modkey ^ "-" ^ last, toggle_last, "");
    ]
 
 (* Register for events *)
