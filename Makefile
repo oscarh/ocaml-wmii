@@ -8,7 +8,7 @@ OCAMLDOC = ocamldoc
 OCAMLDEP = ocamldep
 
 # Libs to link with
-REQUIRES = unix str ixp threads
+REQUIRES = unix str o9p threads
 
 # Sources
 SOURCES = src/util.ml src/wmii.ml \

@@ -48,8 +48,8 @@ let wmii_address =
     else adrs
 
 let user = Sys.getenv "USER"
-let conn = Ixpc.connect wmii_address
-let rootfid = Ixpc.attach conn user "/"
+let conn = O9pc.connect wmii_address
+let rootfid = O9pc.attach conn user "/"
 
 (* Activate/deactivate debug *)
 let debug_channel = ref None
@@ -71,15 +71,15 @@ let debug str =
 
 (* Core functions *)
 let write conn rootfid file data =
-   let fid, iounit = Ixpc.walk_open conn rootfid false file Ixpc.oWRITE in
+   let fid, iounit = O9pc.walk_open conn rootfid false file O9pc.oWRITE in
    let len = Int32.of_int (String.length data) in
-   ignore(Ixpc.write conn fid iounit Int64.zero len data);
-   Ixpc.clunk conn fid
+   ignore(O9pc.write conn fid iounit Int64.zero len data);
+   O9pc.clunk conn fid
 
 let read conn rootfid file = 
-   let fid, iounit = Ixpc.walk_open conn rootfid false file Ixpc.oREAD in
-   let data = Ixpc.read conn fid iounit Int64.zero (Int32.of_int 4096) in
-   Ixpc.clunk conn fid;
+   let fid, iounit = O9pc.walk_open conn rootfid false file O9pc.oREAD in
+   let data = O9pc.read conn fid iounit Int64.zero (Int32.of_int 4096) in
+   O9pc.clunk conn fid;
    data
 
 let create conn rootfid file =
@@ -88,13 +88,13 @@ let create conn rootfid file =
     let dir = String.sub file 0 index in
     let file = 
         String.sub file (index + 1) ((String.length file) - (index + 1)) in
-    let fid = Ixpc.walk conn rootfid false dir in
-    let _ = Ixpc.create conn fid file perm Ixpc.oWRITE in
-    Ixpc.clunk conn fid
+    let fid = O9pc.walk conn rootfid false dir in
+    let _ = O9pc.create conn fid file perm O9pc.oWRITE in
+    O9pc.clunk conn fid
 
 let remove conn rootfid file =
-    let fid = Ixpc.walk conn rootfid false file in
-    Ixpc.remove conn fid
+    let fid = O9pc.walk conn rootfid false file in
+    O9pc.remove conn fid
 
 let dmenu ?prompt:(prompt="") out_str =
    let cmd = "dmenu" in
@@ -139,7 +139,7 @@ let dmenu ?prompt:(prompt="") out_str =
 
 let current_tags () =
    let data = read conn rootfid "/tag" in
-   let files = Ixpc.unpack_files data in
+   let files = O9pc.unpack_files data in
    List.rev (List.fold_left 
    (
       fun name_list stat -> 
@@ -154,7 +154,7 @@ let client_tags () =
 let current_tag () =
    try
    read conn rootfid "/tag/sel/ctl"
-   with Ixpc.IXPError _ -> ""
+   with O9pc.Client_error _ -> ""
 
 let quit () =
    write conn rootfid "/ctl" "quit"
@@ -236,15 +236,15 @@ let focus dir =
     * http://flyspray.otur.se/?do=details&task_id=12  
     *)
    try write conn rootfid "/tag/sel/ctl" ("select " ^ dir)
-   with Ixpc.IXPError _ -> ()
+   with O9pc.Client_error _ -> ()
 
 let send dir =
    try write conn rootfid "/tag/sel/ctl" ("send sel " ^ dir) 
-   with Ixpc.IXPError _ -> ()
+   with O9pc.Client_error _ -> ()
 
 let mode m =
    try write conn rootfid "/tag/sel/ctl" ("colmode sel " ^ m)
-   with Ixpc.IXPError _ -> ()
+   with O9pc.Client_error _ -> ()
 
 let view_tag tag = 
    write conn rootfid "/ctl" ("view " ^ tag)
@@ -314,8 +314,8 @@ let destroy_tag args =
    let tag = List.hd args in
    try 
       remove conn rootfid ("/lbar/" ^ tag)
-   with Ixpc.IXPError msg -> 
-      debug (sprintf "\nERROR:\nIXPError %s\n\n" msg)
+   with O9pc.Client_error msg -> 
+      debug (sprintf "\nERROR:\nClient_error %s\n\n" msg)
 
 let tagbar_click args =
    match args with
@@ -329,7 +329,7 @@ let focus_tag args =
       let tag_file = "/lbar/" ^ tag in
       write conn rootfid tag_file 
          ((color_to_string !focuscolors) ^ tag)
-   with Ixpc.IXPError _ -> ()
+   with O9pc.Client_error _ -> ()
 
 let unfocus_tag args =
    let tag = List.hd args in
@@ -339,4 +339,4 @@ let unfocus_tag args =
       let tag_file = "/lbar/" ^ tag in
       write conn rootfid tag_file 
          ((color_to_string !normcolors) ^ tag)
-   with Ixpc.IXPError _ -> ()
+   with O9pc.Client_error _ -> ()

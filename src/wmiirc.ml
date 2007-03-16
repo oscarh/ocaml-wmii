@@ -88,7 +88,7 @@ let error_popup error error_str =
 let handle_error excp =
    let str = match excp with
    | Unix.Unix_error (error, _, _) -> Unix.error_message error
-   | Ixpc.IXPError str -> str
+   | O9pc.Client_error str -> str
    | _ -> "" 
     in if
       error_popup (Printexc.to_string excp) str
@@ -104,7 +104,7 @@ let handle_error excp =
 (* Event *)
 let setup_bars () = (* Remove them if we are restarted *)
     let data = Wmii.read Wmii.conn Wmii.rootfid "/rbar/" in
-    let dirs = Ixpc.unpack_files data in
+    let dirs = O9pc.unpack_files data in
     let remove_file stat =
        let file = "/rbar/" ^ stat.Fcall.name in
        try Wmii.remove Wmii.conn Wmii.rootfid file with _ -> () in
@@ -171,11 +171,11 @@ let rec split_events str events =
 let event_loop () =
    Wmii.debug (sprintf "Event loop start\n");
    let fid, iounit =
-      Ixpc.walk_open Wmii.conn Wmii.rootfid false "event" Ixpc.oREAD in
+      O9pc.walk_open Wmii.conn Wmii.rootfid false "event" O9pc.oREAD in
    let rec read () =
       let len = (Int32.of_int 4096) in
       try 
-          let data = Ixpc.read Wmii.conn fid iounit Int64.zero len in
+          let data = O9pc.read Wmii.conn fid iounit Int64.zero len in
           let events = split_events data [] in
           let handle_events tokens =
              match_event (List.hd tokens) (List.tl tokens) in
@@ -184,20 +184,20 @@ let event_loop () =
           if read_len > 0 && !running then read ()
       with excp -> handle_error excp in
    read ();
-   Ixpc.clunk Wmii.conn fid
+   O9pc.clunk Wmii.conn fid
 
 let xwrite conn rootfid file data =
    (try 
-      let fid = Ixpc.walk conn rootfid false file in
-      ignore (Ixpc.stat conn fid);
-      Ixpc.clunk conn fid
-   with Ixpc.IXPError _ -> Wmii.create conn rootfid file);
+      let fid = O9pc.walk conn rootfid false file in
+      ignore (O9pc.stat conn fid);
+      O9pc.clunk conn fid
+   with O9pc.Client_error _ -> Wmii.create conn rootfid file);
    Wmii.write conn rootfid file data
 
 (* Staus loop *)
 let status_loop () =
-   let conn = Ixpc.connect Wmii.wmii_address in
-   let rootfid = Ixpc.attach conn Wmii.user "/" in
+   let conn = O9pc.connect Wmii.wmii_address in
+   let rootfid = O9pc.attach conn Wmii.user "/" in
    let status = Wmii_conf.plugin_status () in
    let xwrite_status (file, data) =
       xwrite conn rootfid ("/rbar/" ^ file) data in
