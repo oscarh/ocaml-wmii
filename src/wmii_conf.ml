@@ -82,6 +82,7 @@ let max = "m"
 (* Tag *)
 let tag = "t"
 let last = "i"
+let view_urgent = "g"
 
 (* Actions *)
 let program = "p"                   (* Show program list *)
@@ -110,6 +111,7 @@ let keys =
       (modkey ^ "-" ^ kill_key, kill, "");
       (modkey ^ "-" ^ action_key, action_menu, "");
       (modkey ^ "-" ^ last, toggle_last, "");
+      (modkey ^ "-" ^ view_urgent, view_urgent_tag, "");
    ]
 
 (* Register for events *)
@@ -120,6 +122,8 @@ let events =
       ("LeftBarClick", tagbar_click);
       ("FocusTag", focus_tag);
       ("UnfocusTag", unfocus_tag);
+		("Urgent", urgent); 
+		("NotUrgentTag", not_urgent_tag);
    ]
 
 (* Action menu *)

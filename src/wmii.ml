@@ -39,6 +39,8 @@ open Printf
 type color = {text:string; color:string; border:string}
 
 let last_tag = ref None
+let next_last_tag = ref None
+let urgent_tags = ref []
 
 (* Connection *)
 let adrs_exp = Str.regexp "unix!\\(.+\\)"
@@ -97,7 +99,7 @@ let remove conn rootfid file =
     O9pc.remove conn fid
 
 let dmenu ?prompt:(prompt="") out_str =
-   let cmd = "dmenu" in
+   let cmd = "/usr/non-portage/bin/dmenu" in
    let args = [|
       cmd;
       "-b";
@@ -238,6 +240,7 @@ let focus dir =
    try write conn rootfid "/tag/sel/ctl" ("select " ^ dir)
    with O9pc.Client_error _ -> ()
 
+
 let send dir =
    try write conn rootfid "/tag/sel/ctl" ("send sel " ^ dir) 
    with O9pc.Client_error _ -> ()
@@ -246,15 +249,46 @@ let mode m =
    try write conn rootfid "/tag/sel/ctl" ("colmode sel " ^ m)
    with O9pc.Client_error _ -> ()
 
-let view_tag tag = 
+let view_tag ?set_history:(set_history=true)tag = 
+	if set_history then
+		begin 
+			match !next_last_tag with
+			| None ->
+				last_tag := Some (current_tag ())
+			| _ ->
+				last_tag := !next_last_tag;
+				next_last_tag := None
+		end
+	else
+		begin 
+			match !next_last_tag with
+			| None -> 
+					next_last_tag := !last_tag;
+					last_tag := Some (current_tag ())
+			| _ ->
+					()
+		end;
    write conn rootfid "/ctl" ("view " ^ tag)
 
+let view_urgent_tag _ =
+	match !urgent_tags with
+	| [] -> () 
+	| _ ->  view_tag ~set_history:false (List.hd !urgent_tags)
+
+let toggle_last _ =
+   match !last_tag with
+   | Some t -> view_tag t
+   | None -> ()
+
 let sel_tag _ =
-   let current = [current_tag ()] in
+   let current = current_tag () in
    let tags = current_tags () in
-   let tags_str = list_to_str ~ignore:current tags in
+	let tags_str = list_to_str ~ignore:[current] tags in
    let new_tag = dmenu ~prompt:"view:" tags_str in 
-   view_tag new_tag
+	if current = new_tag then
+		()
+	else
+		view_tag new_tag
 
 let set_tag _ =
    try 
@@ -293,10 +327,6 @@ let action_menu _ =
          cb ()
       with Not_found -> ()
 
-let toggle_last _ =
-   match !last_tag with
-   | Some t -> view_tag t
-   | None -> ()
 
 (* Event functions *)
 let create_client cid =
@@ -324,19 +354,50 @@ let tagbar_click args =
 
 let focus_tag args =
    let tag = List.hd args in
-   flush stdout;
    try 
       let tag_file = "/lbar/" ^ tag in
       write conn rootfid tag_file 
          ((color_to_string !focuscolors) ^ tag)
    with O9pc.Client_error _ -> ()
 
-let unfocus_tag args =
-   let tag = List.hd args in
-   last_tag := Some tag;
-   flush stdout;
+let set_tagbar_color tag color =
    try 
       let tag_file = "/lbar/" ^ tag in
       write conn rootfid tag_file 
-         ((color_to_string !normcolors) ^ tag)
+         ((color_to_string color) ^ tag)
    with O9pc.Client_error _ -> ()
+
+let focus_tag args =
+   let tag = List.hd args in
+		set_tagbar_color tag !focuscolors
+
+let unfocus_tag args =
+   let tag = List.hd args in
+		set_tagbar_color tag !normcolors
+
+(* Urgent handling *)
+let get_client_tags cid =
+	let tags = read conn rootfid ("/client/" ^ cid ^ "/tags") in
+	Util.split_string tags '+'
+
+
+let set_urgent tags =
+	urgent_tags := List.append !urgent_tags tags;
+	List.iter (fun tag -> set_tagbar_color tag !focuscolors) tags
+
+let urgent args =
+	let client_id = List.hd args in
+	let client_tags = get_client_tags client_id in
+	set_urgent client_tags
+
+let not_urgent_tag args =
+	let tag = List.nth args 1 in
+	let current = current_tag () in	
+	urgent_tags := List.filter (fun t -> not (t = tag)) !urgent_tags;
+	let colors = 
+		begin if current = tag then
+			!focuscolors
+		else
+			!normcolors
+		end
+	in set_tagbar_color tag colors 
