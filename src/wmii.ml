@@ -374,7 +374,12 @@ let focus_tag args =
 
 let unfocus_tag args =
    let tag = List.hd args in
-		set_tagbar_color tag !normcolors
+	let colors =
+		if List.exists (fun t -> tag = t) !urgent_tags then
+			!urgentcolors
+		else 
+			!normcolors
+	in set_tagbar_color tag colors
 
 (* Urgent handling *)
 let get_client_tags cid =
@@ -383,8 +388,11 @@ let get_client_tags cid =
 
 
 let set_urgent tags =
+	let current = current_tag () in
 	urgent_tags := List.append !urgent_tags tags;
-	List.iter (fun tag -> set_tagbar_color tag !urgentcolors) tags
+	List.iter (
+		fun tag -> if not (current = tag) then set_tagbar_color tag !urgentcolors
+		) tags
 
 let urgent args =
 	let client_id = List.hd args in
