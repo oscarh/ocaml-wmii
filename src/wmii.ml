@@ -39,7 +39,7 @@ open Printf
 type color = {text:string; color:string; border:string}
 
 let last_tag = ref None
-let next_last_tag = ref None
+let second_last_tag = ref None
 let urgent_tags = ref []
 
 (* Connection *)
@@ -58,6 +58,7 @@ let debug_channel = ref None
 
 let normcolors = ref {text = "#222222" ; color = "#eeeeee" ; border="#666666"}
 let focuscolors = ref {text = "#ffffff" ; color = "#335577" ; border = "#447799"}
+let urgentcolors = ref {text = "#222222" ; color = "#F5B800" ; border = "#447799"}
 let backgroundcolors = ref "#333333"
 let font = ref "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*"
 
@@ -252,18 +253,18 @@ let mode m =
 let view_tag ?set_history:(set_history=true)tag = 
 	if set_history then
 		begin 
-			match !next_last_tag with
+			match !second_last_tag with
 			| None ->
 				last_tag := Some (current_tag ())
 			| _ ->
-				last_tag := !next_last_tag;
-				next_last_tag := None
+				last_tag := !second_last_tag;
+				second_last_tag := None
 		end
 	else
 		begin 
-			match !next_last_tag with
+			match !second_last_tag with
 			| None -> 
-					next_last_tag := !last_tag;
+					second_last_tag := !last_tag;
 					last_tag := Some (current_tag ())
 			| _ ->
 					()
@@ -383,7 +384,7 @@ let get_client_tags cid =
 
 let set_urgent tags =
 	urgent_tags := List.append !urgent_tags tags;
-	List.iter (fun tag -> set_tagbar_color tag !focuscolors) tags
+	List.iter (fun tag -> set_tagbar_color tag !urgentcolors) tags
 
 let urgent args =
 	let client_id = List.hd args in
