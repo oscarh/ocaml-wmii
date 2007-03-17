@@ -100,7 +100,7 @@ let remove conn rootfid file =
     O9pc.remove conn fid
 
 let dmenu ?prompt:(prompt="") out_str =
-   let cmd = "/usr/non-portage/bin/dmenu" in
+   let cmd = "dmenu" in
    let args = [|
       cmd;
       "-b";
