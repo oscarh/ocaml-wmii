@@ -237,6 +237,7 @@ let main () =
    Wmii.normcolors := Wmii_conf.normcolors;
    Wmii.focuscolors := Wmii_conf.focuscolors;
    Wmii.backgroundcolors := Wmii_conf.backgroundcolors;
+   Wmii.urgentcolors := Wmii_conf.urgentcolors;
    Wmii.font := Wmii_conf.font;
 
 	Wmii.dmenu_on_bottom := Wmii_conf.dmenu_on_bottom;
