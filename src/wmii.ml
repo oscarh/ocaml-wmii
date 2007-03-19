@@ -42,6 +42,8 @@ let last_tag = ref None
 let second_last_tag = ref None
 let urgent_tags = ref []
 
+let dmenu_on_bottom = ref true
+
 (* Connection *)
 let adrs_exp = Str.regexp "unix!\\(.+\\)"
 let wmii_address =
@@ -103,7 +105,11 @@ let dmenu ?prompt:(prompt="") out_str =
    let cmd = "dmenu" in
    let args = [|
       cmd;
-      "-b";
+	|] in let args = if !dmenu_on_bottom then
+		Array.append args [| "-b"; |]
+	else
+		args in
+	let args = Array.append args [|
       "-fn"; !font;
       "-nb"; !normcolors.color;
       "-nf"; !normcolors.text;

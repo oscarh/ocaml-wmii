@@ -239,6 +239,8 @@ let main () =
    Wmii.backgroundcolors := Wmii_conf.backgroundcolors;
    Wmii.font := Wmii_conf.font;
 
+	Wmii.dmenu_on_bottom := Wmii_conf.dmenu_on_bottom;
+
    add_event "RightBarClick" rigth_bar_click;
 
    setup_bars ();
