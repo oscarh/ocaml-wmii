@@ -295,7 +295,11 @@ let sel_tag _ =
 	if current = new_tag then
 		()
 	else
-		view_tag new_tag
+		match new_tag with
+		| "" -> ()
+		| _ -> 
+				Printf.printf "View_tag: \"%s\"\n" new_tag; 
+				view_tag new_tag
 
 let set_tag _ =
    try 
