@@ -292,14 +292,12 @@ let sel_tag _ =
    let tags = current_tags () in
 	let tags_str = list_to_str ~ignore:[current] tags in
    let new_tag = dmenu ~prompt:"view:" tags_str in 
-	if current = new_tag then
-		()
-	else
-		match new_tag with
+	if current = new_tag then ()
+	else match new_tag with
 		| "" -> ()
 		| _ -> 
-				Printf.printf "View_tag: \"%s\"\n" new_tag; 
-				view_tag new_tag
+			debug (sprintf "View_tag: \"%s\"\n" new_tag);
+			view_tag new_tag
 
 let set_tag _ =
    try 
