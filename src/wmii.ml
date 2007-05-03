@@ -296,8 +296,8 @@ let sel_tag _ =
 	else match new_tag with
 		| "" -> ()
 		| _ -> 
-			debug (sprintf "View_tag: \"%s\"\n" new_tag);
-			view_tag new_tag
+			(debug (sprintf "View_tag: \"%s\"\n" new_tag);
+			view_tag new_tag)
 
 let set_tag _ =
    try 
