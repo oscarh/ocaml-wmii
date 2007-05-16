@@ -37,7 +37,7 @@ open Wmii
 (** User Settings **)
 (* Look and feel *)
 let font = "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*"
-let normcolors = {text = "#222222" ; color = "#eeeeee" ; border="#666666"}
+let normcolors = {text = "#222222" ; color = "#eeeeee" ; border = "#666666"}
 let focuscolors = {text = "#ffffff" ; color = "#335577" ; border = "#447799"}
 let urgentcolors = {text = "#222222" ; color = "#FFE47A" ; border = "#447799"}
 let backgroundcolors = "#333333"
@@ -51,12 +51,12 @@ let status_interval = 1.0 (* Seconds *)
 
 (* Rules *)
 let tagrules = 
-   "/MPlayer.*/ -> ~\n" ^
-   "/.*/ -> !\n" ^
-   "/.*/ -> default\n"
+	"/MPlayer.*/ -> ~\n" ^
+	"/.*/ -> !\n" ^
+	"/.*/ -> default\n"
 
 let colrules = 
-   "/.*/ -> 50+50"
+	"/.*/ -> 50+50"
 
 (* Debug settings *)
 let debug_file = "/tmp/wmii_debug.log"
@@ -97,50 +97,50 @@ let termkey = "x"                   (* Launch terminal *)
 
 (* Activate the key bindings *)
 let keys =
-   [
-      (modkey ^ "-" ^ right, focus, "right");
-      (modkey ^ "-" ^ left, focus, "left");
-      (modkey ^ "-" ^ up, focus, "up");
-      (modkey ^ "-" ^ down, focus, "down");
-      (modkey ^ "-" ^ toggle, focus, "toggle");
-      (modkey ^ "-" ^ modshift ^ "-" ^ right, send, "right");
-      (modkey ^ "-" ^ modshift ^ "-" ^ left, send, "left");
-      (modkey ^ "-" ^ modshift ^ "-" ^ up, send, "up");
-      (modkey ^ "-" ^ modshift ^ "-" ^ down, send, "down");
-      (modkey ^ "-" ^ modshift ^ "-" ^ toggle, send, "toggle");
-      (modkey ^ "-" ^ default, mode, "default");
-      (modkey ^ "-" ^ stack, mode, "stack");
-      (modkey ^ "-" ^ max, mode, "max");
-      (modkey ^ "-" ^ tag, sel_tag, "");
-      (modkey ^ "-" ^ modshift ^ "-" ^ tag, set_tag, "");
-      (modkey ^ "-" ^ program, launch, "");
-      (modkey ^ "-" ^ termkey, spawn, terminal);
-      (modkey ^ "-" ^ kill_key, kill, "");
-      (modkey ^ "-" ^ action_key, action_menu, "");
-      (modkey ^ "-" ^ last, toggle_last, "");
-      (modkey ^ "-" ^ view_urgent, view_urgent_tag, "");
-      (modkey ^ "-" ^ switch_left, switch_workspace, "left");
-      (modkey ^ "-" ^ switch_right, switch_workspace, "right");
-   ]
+	[
+		(modkey ^ "-" ^ right, focus, "right");
+		(modkey ^ "-" ^ left, focus, "left");
+		(modkey ^ "-" ^ up, focus, "up");
+		(modkey ^ "-" ^ down, focus, "down");
+		(modkey ^ "-" ^ toggle, focus, "toggle");
+		(modkey ^ "-" ^ modshift ^ "-" ^ right, send, "right");
+		(modkey ^ "-" ^ modshift ^ "-" ^ left, send, "left");
+		(modkey ^ "-" ^ modshift ^ "-" ^ up, send, "up");
+		(modkey ^ "-" ^ modshift ^ "-" ^ down, send, "down");
+		(modkey ^ "-" ^ modshift ^ "-" ^ toggle, send, "toggle");
+		(modkey ^ "-" ^ default, mode, "default");
+		(modkey ^ "-" ^ stack, mode, "stack");
+		(modkey ^ "-" ^ max, mode, "max");
+		(modkey ^ "-" ^ tag, sel_tag, "");
+		(modkey ^ "-" ^ modshift ^ "-" ^ tag, set_tag, "");
+		(modkey ^ "-" ^ program, launch, "");
+		(modkey ^ "-" ^ termkey, spawn, terminal);
+		(modkey ^ "-" ^ kill_key, kill, "");
+		(modkey ^ "-" ^ action_key, action_menu, "");
+		(modkey ^ "-" ^ last, toggle_last, "");
+		(modkey ^ "-" ^ view_urgent, view_urgent_tag, "");
+		(modkey ^ "-" ^ switch_left, switch_workspace, "left");
+		(modkey ^ "-" ^ switch_right, switch_workspace, "right");
+	]
 
 (* Register for events *)
 let events =
-   [
-      ("CreateTag", create_tag);
-      ("DestroyTag", destroy_tag);
-      ("LeftBarClick", tagbar_click);
-      ("FocusTag", focus_tag);
-      ("UnfocusTag", unfocus_tag);
+	[
+		("CreateTag", create_tag);
+		("DestroyTag", destroy_tag);
+		("LeftBarClick", tagbar_click);
+		("FocusTag", focus_tag);
+		("UnfocusTag", unfocus_tag);
 		("Urgent", urgent); 
 		("NotUrgentTag", not_urgent_tag);
-   ]
+	]
 
 (* Action menu *)
 let actions =
-   [
-      ("quit", quit);
-      ("wmiirc", fun () -> spawn Sys.executable_name);
-   ]
+	[
+		("quit", quit);
+		("wmiirc", fun () -> spawn Sys.executable_name);
+	]
 
 (* 
  * Plug-in status
@@ -152,18 +152,17 @@ let actions =
  * The status is shown in the rbar, ordered by the filename.
  *)
 let plugin_status () =
-    let date = Date.localtime () in
-    let msgs = "Msgs: " ^ Util.safe_read Gajim.msg_count in
-    let battery_percent = Util.safe_read Acpi.battery_percent in
-    let power_state = Util.safe_read Acpi.power_state in
-
-    let battery = "Battery: " ^ battery_percent ^ " (" ^ power_state ^ ")" in
-
-    [
-        ("0_gajim", msgs);
-        ("1_date", date); 
-        ("2_battery", battery);
-    ]
+	let date = Date.localtime () in
+	let msgs = "Msgs: " ^ Util.safe_read Gajim.msg_count in
+	let battery_percent = Util.safe_read Acpi.battery_percent in
+	let power_state = Util.safe_read Acpi.power_state in
+	
+	let battery = "Battery: " ^ battery_percent ^ " (" ^ power_state ^ ")" in
+	
+	[
+		("1_date", date); 
+		("2_battery", battery);
+	]
 
 (* 
  * Plug-in callbacks 
@@ -175,6 +174,5 @@ let plugin_status () =
  * The argument is the number representing the mouse button pressed.
  *)
 let status_callbacks =
-    [
-        ("0_gajim", Gajim.plugin_cb);
-    ]
+	[
+	]
