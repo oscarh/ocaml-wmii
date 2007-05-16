@@ -33,36 +33,44 @@
 (* SUCH DAMAGE.                                                               *)
 (******************************************************************************)
 
+(*
+ *
+ * Put something like this in keys in wmii_config:
+ * (modkey ^ "-" ^ b, Tmp_tag.toggle, "");
+ * and something like this in events:
+ * 
+ * ("DestroyClient", Tmp_tag.destroy_client_callback);
+ *)
+
 open Wmii
 
 let original_tags = Hashtbl.create 4
 
 let destroy_client_callback args =
-   let cid = List.hd args in
-   Hashtbl.remove original_tags cid
+	let cid = List.hd args in
+	Hashtbl.remove original_tags cid
 
 let tag cid =
-   try
-      Hashtbl.add original_tags cid (current_tag ());
-      let tmp_tag = "+" ^ cid in
-      send_to_tag cid tmp_tag;
-      view_tag  tmp_tag
-   with _ -> ()
+	try
+		Hashtbl.add original_tags cid (current_tag ());
+		let tmp_tag = "+" ^ cid in
+		send_to_tag cid tmp_tag;
+		view_tag  tmp_tag
+	with _ -> ()
 
 let untag_and_view cid tag =
-   try
-      Hashtbl.remove original_tags cid;
-      let tmp_tag = "-" ^ cid in
-      send_to_tag cid tmp_tag;
-      view_tag tag
-   with _ -> ()
+	try
+		Hashtbl.remove original_tags cid;
+		let tmp_tag = "-" ^ cid in
+		send_to_tag cid tmp_tag;
+		view_tag tag
+	with _ -> ()
 
 let toggle _ =
-   try
-      let cid = read conn rootfid "/client/sel/ctl" in
-      (try 
-         let tag = Hashtbl.find original_tags cid in
-         untag_and_view cid tag
-      with Not_found ->
-         tag cid)
-  with _ -> ()
+	try
+		let cid = read conn rootfid "/client/sel/ctl" in
+		(try 
+			let tag = Hashtbl.find original_tags cid in
+			untag_and_view cid tag
+		with Not_found -> tag cid)
+	with _ -> ()
