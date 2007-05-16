@@ -56,7 +56,8 @@ let conn = O9pc.connect wmii_address
 let rootfid = O9pc.attach conn user "/"
 
 (* Activate/deactivate debug *)
-let debug_channel = ref None
+(* let debug_channel = ref None *)
+let debug_channel = ref (Some stdout)
 
 let normcolors = ref {text = "#222222" ; color = "#eeeeee" ; border="#666666"}
 let focuscolors = ref {text = "#ffffff" ; color = "#335577" ; border = "#447799"}
@@ -394,7 +395,6 @@ let get_client_tags cid =
 	let tags = read conn rootfid ("/client/" ^ cid ^ "/tags") in
 	Util.split_string tags '+'
 
-
 let set_urgent tags =
 	let current = current_tag () in
 	urgent_tags := List.append !urgent_tags tags;
@@ -418,3 +418,36 @@ let not_urgent_tag args =
 			!normcolors
 		end
 	in set_tagbar_color tag colors 
+
+let switch_workspace dir =
+	let tags = current_tags () in
+	let current = current_tag () in
+	let switch_right_fun = 
+		(
+			fun p t -> 
+				if t = current then
+					begin match p with
+					| "" -> view_tag (List.nth tags ((List.length tags) -1)); t
+					| _ -> view_tag p; t
+					end 
+				else
+					t
+		) in
+	let switch_left_fun = 
+		(
+			fun t p -> 
+				if t = current then
+					begin match p with
+					| "" -> view_tag (List.hd tags); t
+					| _ -> view_tag p; t
+					end 
+				else
+					t
+		) in
+	begin match dir with 
+	| "left" -> List.fold_right switch_left_fun tags ""; ()
+	| "right" -> List.fold_left switch_right_fun "" tags; ()
+	| _ -> ()
+	end;
+	()
+

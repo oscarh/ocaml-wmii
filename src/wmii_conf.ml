@@ -88,6 +88,9 @@ let tag = "t"
 let last = "i"
 let view_urgent = "g"
 
+let switch_left = "o"
+let switch_right = "e"
+
 (* Actions *)
 let program = "p"                   (* Show program list *)
 let termkey = "x"                   (* Launch terminal *)
@@ -116,6 +119,8 @@ let keys =
       (modkey ^ "-" ^ action_key, action_menu, "");
       (modkey ^ "-" ^ last, toggle_last, "");
       (modkey ^ "-" ^ view_urgent, view_urgent_tag, "");
+      (modkey ^ "-" ^ switch_left, switch_workspace, "left");
+      (modkey ^ "-" ^ switch_right, switch_workspace, "right");
    ]
 
 (* Register for events *)
