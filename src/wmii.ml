@@ -444,10 +444,7 @@ let switch_workspace dir =
 				else
 					t
 		) in
-	begin match dir with 
+	match dir with 
 	| "left" -> List.fold_right switch_left_fun tags ""; ()
 	| "right" -> List.fold_left switch_right_fun "" tags; ()
 	| _ -> ()
-	end;
-	()
-

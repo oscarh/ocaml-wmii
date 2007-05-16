@@ -42,7 +42,7 @@ let focuscolors = {text = "#ffffff" ; color = "#335577" ; border = "#447799"}
 let urgentcolors = {text = "#222222" ; color = "#FFE47A" ; border = "#447799"}
 let backgroundcolors = "#333333"
 
-let dmenu_on_bottom = true
+let dmenu_on_bottom = false
 
 let default_tag = "default"
 let terminal = "xterm"
