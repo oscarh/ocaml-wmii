@@ -441,4 +441,3 @@ let switch_workspace dir =
 	| "right" -> ignore (List.fold_left switch_right "" tags)
 	| _ -> ()
 	end
-
