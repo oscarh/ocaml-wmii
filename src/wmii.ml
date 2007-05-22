@@ -422,32 +422,23 @@ let not_urgent_tag args =
 let switch_workspace dir =
 	let tags = current_tags () in
 	let current = current_tag () in
-	let switch_right_fun = 
-		(
-			fun p t -> 
-				if t = current then
-					begin match p with
-					| "" -> view_tag (List.nth tags ((List.length tags) -1)); t
-					| _ -> view_tag p; t
-					end 
-				else
-					t
-		) in
-	let switch_left_fun = 
-		(
-			fun t p -> 
-				if t = current then
-					begin match p with
-					| "" -> view_tag (List.hd tags); t
-					| _ -> view_tag p; t
-					end 
-				else
-					t
-		) in
+    let switch_right p t =
+        if t = current then
+            begin match p with
+            | "" -> view_tag (List.nth tags ((List.length tags) - 1)); t
+            | _ -> view_tag p; t
+            end
+        else t in
+    let switch_left t p =
+        if t = current then
+            begin match p with
+            | "" -> view_tag (List.hd tags); t
+            | _ -> view_tag p; t
+            end
+        else t in
 	begin match dir with 
-	| "left" -> List.fold_right switch_left_fun tags ""; ()
-	| "right" -> List.fold_left switch_right_fun "" tags; ()
+    | "left" -> ignore (List.fold_right switch_left tags "")
+	| "right" -> ignore (List.fold_left switch_right "" tags)
 	| _ -> ()
-	end;
-	()
+	end
 
