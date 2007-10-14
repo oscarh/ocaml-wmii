@@ -163,7 +163,8 @@ let client_tags () =
 
 let current_tag () =
    try
-   read conn rootfid "/tag/sel/ctl"
+       let data = read conn rootfid "/tag/sel/ctl" in
+       Str.first_chars data (Str.search_forward (Str.regexp_string "\n") data 0)
    with O9pc.Client_error _ -> ""
 
 let quit () =
@@ -189,7 +190,7 @@ let send_to_tag cid tag =
 
 (* Misc helper functions *)
 let color_to_string color =
-   color.text ^ " " ^ color.color ^ " " ^ color.border
+   color.text ^ " " ^ color.color ^ " " ^ color.border ^ " "
 
 let list_to_str ?ignore:(ignore = []) ?prefix:(pre = "") str_list =
    let filtered_list = filter str_list ignore in
@@ -361,14 +362,6 @@ let tagbar_click args =
    match args with
    | [_; tag] -> view_tag tag
    | _ -> ()
-
-let focus_tag args =
-   let tag = List.hd args in
-   try 
-      let tag_file = "/lbar/" ^ tag in
-      write conn rootfid tag_file 
-         ((color_to_string !focuscolors) ^ tag)
-   with O9pc.Client_error _ -> ()
 
 let set_tagbar_color tag color =
    try 
