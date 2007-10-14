@@ -42,7 +42,7 @@ let focuscolors = {text = "#ffffff" ; color = "#335577" ; border = "#447799"}
 let urgentcolors = {text = "#222222" ; color = "#FFE47A" ; border = "#447799"}
 let backgroundcolors = "#333333"
 
-let dmenu_on_bottom = false
+let dmenu_on_bottom = true
 
 let default_tag = "default"
 let terminal = "xterm"
@@ -51,7 +51,6 @@ let status_interval = 1.0 (* Seconds *)
 
 (* Rules *)
 let tagrules = 
-	"/MPlayer.*/ -> ~\n" ^
 	"/.*/ -> !\n" ^
 	"/.*/ -> default\n"
 
@@ -60,7 +59,7 @@ let colrules =
 
 (* Debug settings *)
 let debug_file = "/tmp/wmii_debug.log"
-let debug = true
+let debug = false
 
 (** Key bindings **)
 (* Control keys *)
@@ -153,7 +152,6 @@ let actions =
  *)
 let plugin_status () =
 	let date = Date.localtime () in
-	let msgs = "Msgs: " ^ Util.safe_read Gajim.msg_count in
 	let battery_percent = Util.safe_read Acpi.battery_percent in
 	let power_state = Util.safe_read Acpi.power_state in
 	
