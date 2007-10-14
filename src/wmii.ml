@@ -164,7 +164,7 @@ let client_tags () =
 let current_tag () =
    try
        let data = read conn rootfid "/tag/sel/ctl" in
-       Str.first_chars data (Str.search_forward (Str.regexp_string "\n") data 0)
+       String.sub data 0 (String.index data '\n');
    with O9pc.Client_error _ -> ""
 
 let quit () =
