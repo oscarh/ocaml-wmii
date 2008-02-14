@@ -12,6 +12,7 @@ REQUIRES = unix str o9p threads
 
 # Sources
 SOURCES = src/util.ml src/wmii.ml \
+			plugin/xwarppointer.mli plugin/xwarppointer.ml \
 			plugin/tmp_tag.mli plugin/tmp_tag.ml \
 			plugin/acpi.mli plugin/acpi.ml \
 			plugin/gajim.mli plugin/gajim.ml \
