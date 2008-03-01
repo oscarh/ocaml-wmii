@@ -35,6 +35,17 @@
 
 open Printf
 
+(* Activate/deactivate debug *)
+(* let debug_channel = ref None *)
+let debug_channel = ref (Some stdout)
+
+let debug str =
+   match !debug_channel with
+   | Some channel -> 
+      output_string channel str;
+      flush channel
+   | None -> ()
+
 (* Types/Globals *)
 type color = {text:string; color:string; border:string}
 
@@ -45,19 +56,28 @@ let urgent_tags = ref []
 let dmenu_on_bottom = ref true
 
 (* Connection *)
-let adrs_exp = Str.regexp "unix!\\(.+\\)"
-let wmii_address =
-    let adrs = Sys.getenv "WMII_ADDRESS" in
-    if Str.string_match adrs_exp adrs 0 then Str.matched_group 1 adrs
-    else adrs
-
 let user = Sys.getenv "USER"
+let adrs_exp = Str.regexp "unix!\\(.+\\)"
+let screen_exp = Str.regexp ":[0-9]+"
+let wmii_address =
+        try
+            let adrs = Sys.getenv "WMII_ADDRESS" in
+            if Str.string_match adrs_exp adrs 0 then Str.matched_group 1 adrs
+            else adrs
+        with Not_found ->
+            let display = Sys.getenv "DISPLAY" in
+            let screen =
+                if Str.string_match screen_exp display 0 then
+                    Str.matched_group 0 display
+                else
+                    display in
+            let adrs =
+                Filename.concat ("/tmp/ns." ^ user ^ "." ^ screen) "wmii" in
+            debug (sprintf "Could not read WMII_ADDRESS, using: %s\n" adrs);
+            adrs
+
 let conn = O9pc.connect wmii_address
 let rootfid = O9pc.attach conn user "/"
-
-(* Activate/deactivate debug *)
-(* let debug_channel = ref None *)
-let debug_channel = ref (Some stdout)
 
 let normcolors = ref {text = "#222222" ; color = "#eeeeee" ; border="#666666"}
 let focuscolors = ref {text = "#ffffff" ; color = "#335577" ; border = "#447799"}
@@ -67,13 +87,6 @@ let font = ref "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*"
 
 (* Action menu *)
 let (actions : (string, (unit -> unit)) Hashtbl.t) = Hashtbl.create 10
-
-let debug str =
-   match !debug_channel with
-   | Some channel -> 
-      output_string channel str;
-      flush channel
-   | None -> ()
 
 (* Core functions *)
 let write conn rootfid file data =
@@ -164,6 +177,7 @@ let client_tags () =
 let current_tag () =
    try
        let data = read conn rootfid "/tag/sel/ctl" in
+       (* XXX There is more onfo here now, maybe we should use it? *)
        String.sub data 0 (String.index data '\n');
    with O9pc.Client_error _ -> ""
 
