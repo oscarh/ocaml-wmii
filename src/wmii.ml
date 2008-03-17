@@ -84,6 +84,7 @@ let focuscolors = ref {text = "#ffffff" ; color = "#335577" ; border = "#447799"
 let urgentcolors = ref {text = "#222222" ; color = "#F5B800" ; border = "#447799"}
 let backgroundcolors = ref "#333333"
 let font = ref "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*"
+let dmenu_y = ref "0"
 
 (* Action menu *)
 let (actions : (string, (unit -> unit)) Hashtbl.t) = Hashtbl.create 10
@@ -126,6 +127,7 @@ let dmenu ?prompt:(prompt="") out_str =
       "-nf"; !normcolors.text;
       "-sb"; !focuscolors.color;
       "-sf"; !focuscolors.text;
+      "-y"; !dmenu_y;
    |] in
    let args = match prompt with
       | "" -> args

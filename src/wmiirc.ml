@@ -240,7 +240,7 @@ let main () =
    Wmii.urgentcolors := Wmii_conf.urgentcolors;
    Wmii.font := Wmii_conf.font;
 
-	Wmii.dmenu_on_bottom := Wmii_conf.dmenu_on_bottom;
+   Wmii.dmenu_y := Wmii_conf.dmenu_y;
 
    add_event "RightBarClick" rigth_bar_click;
 
