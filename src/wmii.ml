@@ -36,8 +36,8 @@
 open Printf
 
 (* Activate/deactivate debug *)
-(* let debug_channel = ref None *)
-let debug_channel = ref (Some stdout)
+let debug_channel = ref None
+(* let debug_channel = ref (Some stdout) *)
 
 let debug str =
    match !debug_channel with
@@ -163,13 +163,13 @@ let dmenu ?prompt:(prompt="") out_str =
 let current_tags () =
    let data = read conn rootfid "/tag" in
    let files = O9pc.unpack_files data in
-   List.rev (List.fold_left 
+   List.fold_left 
    (
       fun name_list stat -> 
          match stat.Fcall.name with
          | "sel" -> []
          | name -> name :: name_list 
-   ) [] files)
+   ) [] files
 
 let client_tags () =
    Util.split_string (read conn rootfid "/client/sel/tags") '+'
