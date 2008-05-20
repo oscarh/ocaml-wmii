@@ -11,3 +11,5 @@ syntax: glob
 *.cmxa
 ._*
 doc/*
+depend
+wmiirc
