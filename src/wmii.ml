@@ -53,8 +53,6 @@ let last_tag = ref None
 let second_last_tag = ref None
 let urgent_tags = ref []
 
-let dmenu_on_bottom = ref true
-
 (* Connection *)
 let user = Sys.getenv "USER"
 let adrs_exp = Str.regexp "unix!\\(.+\\)"
@@ -84,7 +82,7 @@ let focuscolors = ref {text = "#ffffff" ; color = "#335577" ; border = "#447799"
 let urgentcolors = ref {text = "#222222" ; color = "#F5B800" ; border = "#447799"}
 let backgroundcolors = ref "#333333"
 let font = ref "-*-fixed-medium-r-normal-*-13-*-*-*-*-*-*-*"
-let dmenu_y = ref "0"
+let dmenu_y = ref "-0"
 
 (* Action menu *)
 let (actions : (string, (unit -> unit)) Hashtbl.t) = Hashtbl.create 10

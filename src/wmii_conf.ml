@@ -47,7 +47,7 @@ let terminal = "xterm"
 let status_interval = 1.0 (* Seconds *)
 
 (* Where will dmenu appear *)
-let dmenu_y = "0"
+let dmenu_y = "-0"
 
 (* Rules *)
 let tagrules = 
@@ -92,7 +92,7 @@ let switch_right = "e"
 
 (* Actions *)
 let program = "p"                   (* Show program list *)
-let termkey = "x"                   (* Launch terminal *)
+let termkey = "Return"                   (* Launch terminal *)
 
 (* Activate the key bindings *)
 let keys =
