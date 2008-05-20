@@ -119,7 +119,10 @@ let dmenu ?prompt:(prompt="") out_str =
    let cmd = "dmenu" in
    let args = [|
       cmd;
-	|] in
+	|] in let args = if !dmenu_on_bottom then
+		Array.append args [| "-b"; |]
+	else
+		args in
 	let args = Array.append args [|
       "-fn"; !font;
       "-nb"; !normcolors.color;
