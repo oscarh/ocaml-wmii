@@ -181,6 +181,10 @@ let current_tag () =
        String.sub data 0 (String.index data '\n');
    with O9pc.Client_error _ -> ""
 
+let current_cid () =
+    let ctl = read conn rootfid "/client/sel/ctl" in
+    String.sub ctl 0 (String.index ctl '\n')
+
 let quit () =
    write conn rootfid "/ctl" "quit"
 

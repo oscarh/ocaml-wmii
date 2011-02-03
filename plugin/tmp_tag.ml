@@ -43,6 +43,7 @@
  *)
 
 open Wmii
+open Printf
 
 let original_tags = Hashtbl.create 4
 
@@ -68,7 +69,7 @@ let untag_and_view cid tag =
 
 let toggle _ =
 	try
-		let cid = read conn rootfid "/client/sel/ctl" in
+        let cid = current_cid () in
 		(try 
 			let tag = Hashtbl.find original_tags cid in
 			untag_and_view cid tag
