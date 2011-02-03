@@ -363,7 +363,8 @@ let create_tag args =
    let tag_file = "/lbar/" ^ tag in
    create conn rootfid tag_file;
    write conn rootfid tag_file 
-      ((color_to_string !normcolors) ^ tag)
+      ("colors " ^ color_to_string !normcolors);
+   write conn rootfid tag_file ("label " ^ tag)
 
 let destroy_tag args =
    let tag = List.hd args in
@@ -381,7 +382,7 @@ let set_tagbar_color tag color =
    try 
       let tag_file = "/lbar/" ^ tag in
       write conn rootfid tag_file 
-         ((color_to_string color) ^ tag)
+         ("colors " ^ (color_to_string color))
    with O9pc.Client_error _ -> ()
 
 let focus_tag args =

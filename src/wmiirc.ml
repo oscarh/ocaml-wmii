@@ -192,7 +192,7 @@ let xwrite conn rootfid file data =
       ignore (O9pc.stat conn fid);
       O9pc.clunk conn fid
    with O9pc.Client_error _ -> Wmii.create conn rootfid file);
-   Wmii.write conn rootfid file data
+   Wmii.write conn rootfid file ("label " ^ data)
 
 (* Staus loop *)
 let status_loop () =
@@ -205,7 +205,7 @@ let status_loop () =
    let rec loop () =
       let status = Wmii_conf.plugin_status () in
       let write_status (file, data) =
-         Wmii.write conn rootfid ("/rbar/" ^ file) data in
+         Wmii.write conn rootfid ("/rbar/" ^ file) ("label " ^ data) in
       List.iter write_status status;
       Thread.delay Wmii_conf.status_interval;
       if !running then loop () in
@@ -223,8 +223,9 @@ let main () =
    Wmii.write Wmii.conn Wmii.rootfid "ctl" ("grabmod " ^ Wmii_conf.modkey);
    Wmii.write Wmii.conn Wmii.rootfid "ctl" "border 1";
 
-   Wmii.write Wmii.conn Wmii.rootfid "tagrules" Wmii_conf.tagrules;
+   (* FIXME: Wmii.write Wmii.conn Wmii.rootfid "tagrules" Wmii_conf.tagrules; *)
    Wmii.write Wmii.conn Wmii.rootfid "colrules" Wmii_conf.colrules;
+
 
    update_keys ();
    update_events ();
@@ -240,7 +241,7 @@ let main () =
    Wmii.urgentcolors := Wmii_conf.urgentcolors;
    Wmii.font := Wmii_conf.font;
 
-	Wmii.dmenu_on_bottom := Wmii_conf.dmenu_on_bottom;
+   Wmii.dmenu_on_bottom := Wmii_conf.dmenu_on_bottom;
 
    add_event "RightBarClick" rigth_bar_click;
 
