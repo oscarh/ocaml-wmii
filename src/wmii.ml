@@ -177,7 +177,7 @@ let client_tags () =
 let current_tag () =
    try
        let data = read conn rootfid "/tag/sel/ctl" in
-       (* XXX There is more onfo here now, maybe we should use it? *)
+       (* XXX There is more info here now, maybe we should use it? *)
        String.sub data 0 (String.index data '\n');
    with O9pc.Client_error _ -> ""
 
