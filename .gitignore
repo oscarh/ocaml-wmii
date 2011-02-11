@@ -1,2 +1,6 @@
 depend
 wmiirc
+
+*.cmi
+*.cmx
+*.o
