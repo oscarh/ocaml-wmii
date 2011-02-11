@@ -45,4 +45,7 @@ let split_string str delimiter =
          split str (i - 1) tokens in
    split str ((String.length str) - 1) []
 
+let first_line str = 
+   String.sub str 0 (String.index str '\n')
+
 let safe_read func = try func () with _ -> "-"

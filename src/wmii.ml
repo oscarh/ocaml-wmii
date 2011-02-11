@@ -178,12 +178,11 @@ let current_tag () =
    try
        let data = read conn rootfid "/tag/sel/ctl" in
        (* XXX There is more info here now, maybe we should use it? *)
-       String.sub data 0 (String.index data '\n');
+       Util.first_line data
    with O9pc.Client_error _ -> ""
 
 let current_cid () =
-    let ctl = read conn rootfid "/client/sel/ctl" in
-    String.sub ctl 0 (String.index ctl '\n')
+    Util.first_line (read conn rootfid "/client/sel/ctl")
 
 let quit () =
    write conn rootfid "/ctl" "quit"
@@ -320,8 +319,7 @@ let sel_tag _ =
 			view_tag new_tag)
 
 let set_tag _ =
-   try 
-      let cid = read conn rootfid "/client/sel/ctl" in
+      let cid = current_cid () in
       let client_tags = client_tags () in
       let tags = current_tags () in
       let regular_tags = list_to_str tags in
@@ -333,7 +331,7 @@ let set_tag _ =
       let tags_str =  list_to_str [minus_tags ; plus_tags ; regular_tags] in
       let new_tag = dmenu ~prompt:"set:" tags_str in 
       send_to_tag cid new_tag;
-   with _ -> ()
+      flush stdout
 
 let launch _ =
    match dmenu ~prompt:"run: " program_str with
