@@ -309,16 +309,17 @@ let toggle_last _ =
 let sel_tag _ =
    let current = current_tag () in
    let tags = current_tags () in
-	let tags_str = list_to_str ~ignore:[current] tags in
+   let tags_str = list_to_str ~ignore:[current] tags in
    let new_tag = dmenu ~prompt:"view:" tags_str in 
-	if current = new_tag then ()
-	else match new_tag with
-		| "" -> ()
-		| _ -> 
-			(debug (sprintf "View_tag: \"%s\"\n" new_tag);
-			view_tag new_tag)
+   if current = new_tag then ()
+   else match new_tag with
+      | "" -> ()
+      | _ -> 
+         (debug (sprintf "View_tag: \"%s\"\n" new_tag);
+            view_tag new_tag)
 
 let set_tag _ =
+   try 
       let cid = current_cid () in
       let client_tags = client_tags () in
       let tags = current_tags () in
@@ -330,8 +331,8 @@ let set_tag _ =
          else "" in
       let tags_str =  list_to_str [minus_tags ; plus_tags ; regular_tags] in
       let new_tag = dmenu ~prompt:"set:" tags_str in 
-      send_to_tag cid new_tag;
-      flush stdout
+      send_to_tag cid new_tag
+   with _ -> ()
 
 let launch _ =
    match dmenu ~prompt:"run: " program_str with
