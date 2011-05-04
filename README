@@ -22,7 +22,7 @@ to use for users not comfortable with editing OCaml source files or compiling
 them.
 
 2. Prerequisites
-You will need OCaml-9P (http://personal.oscarh.net/ocaml-9p.php) to build
+You will need OCaml-9P (http://github.com/oscarh/ocaml9p) to build
 ocaml-wmii.
 
 3. How to configure
