@@ -158,7 +158,11 @@ let dmenu ?prompt:(prompt="") out_str =
       Unix.close out_read;
       (* Clean up child process. *)
       ignore (Unix.waitpid [] pid);
-      String.sub buffer 0 len)
+      let output = (String.sub buffer 0 len) in
+      try 
+          String.sub output 0 (String.index output '\n')
+      with Not_found ->
+          output)
 
 let current_tags () =
    let data = read conn rootfid "/tag" in
@@ -337,7 +341,9 @@ let set_tag _ =
 let launch _ =
    match dmenu ~prompt:"run: " program_str with
    | "" -> ()
-   | cmd -> spawn cmd
+   | cmd ->
+           debug (sprintf "\nspawning: \"%s\"\n\n" cmd);
+           spawn cmd
 
 let action_menu _ =
    let action_str = if Hashtbl.length actions > 0 then
@@ -347,13 +353,15 @@ let action_menu _ =
       List.fold_left build_str (List.hd action_list) (List.tl action_list)
    else
       "" in
-   match dmenu ~prompt:"action: " action_str with
+   let action = dmenu ~prompt:"action: " action_str in
+   match action with
    | ""-> ()
-   | action -> 
+   | _ -> 
       try 
          let cb = Hashtbl.find actions action in
          cb ()
-      with Not_found -> ()
+      with Not_found ->
+          debug (sprintf "\nERROR:\naction not found: \"%s\"\n\n" action)
 
 
 (* Event functions *)
