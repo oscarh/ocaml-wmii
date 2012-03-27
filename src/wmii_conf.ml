@@ -50,9 +50,8 @@ let status_interval = 1.0 (* Seconds *)
 
 
 (* Rules *)
-let tagrules = 
-	"/.*/ -> !\n" ^
-	"/.*/ -> default\n"
+let rules = 
+	"/.*/ tags=sel\n"
 
 let colrules = 
 	"/.*/ -> 50+50"

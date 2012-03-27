@@ -223,7 +223,7 @@ let main () =
    Wmii.write Wmii.conn Wmii.rootfid "ctl" ("grabmod " ^ Wmii_conf.modkey);
    Wmii.write Wmii.conn Wmii.rootfid "ctl" "border 1";
 
-   (* FIXME: Wmii.write Wmii.conn Wmii.rootfid "tagrules" Wmii_conf.tagrules; *)
+   Wmii.write Wmii.conn Wmii.rootfid "rules" Wmii_conf.rules;
    Wmii.write Wmii.conn Wmii.rootfid "colrules" Wmii_conf.colrules;
 
 
