@@ -4,3 +4,5 @@ wmiirc
 *.cmi
 *.cmx
 *.o
+
+.*.sw?
